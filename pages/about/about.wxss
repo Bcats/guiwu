@@ -1,0 +1,118 @@
+/**about.wxss**/
+/* 应用信息 */
+.app-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 60rpx 0;
+}
+
+.app-logo {
+  width: 120rpx;
+  height: 120rpx;
+  background-color: var(--color-primary);
+  border-radius: 24rpx;
+  margin-bottom: 20rpx;
+}
+
+.app-name {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 10rpx;
+}
+
+.app-version {
+  font-size: 28rpx;
+  color: var(--color-text-light);
+  margin-bottom: 6rpx;
+}
+
+.app-update {
+  font-size: 24rpx;
+  color: var(--color-text-light);
+}
+
+/* 功能列表 */
+.function-list {
+  margin-bottom: 40rpx;
+}
+
+.function-card {
+  background-color: var(--color-card);
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.function-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 1rpx solid var(--color-border);
+}
+
+.function-item:last-child {
+  border-bottom: none;
+}
+
+.function-item-content {
+  display: flex;
+  align-items: center;
+}
+
+.function-item-name {
+  font-size: 30rpx;
+  color: var(--color-text);
+}
+
+.function-item-arrow {
+  width: 16rpx;
+  height: 16rpx;
+  border-top: 2rpx solid var(--color-text-light);
+  border-right: 2rpx solid var(--color-text-light);
+  transform: rotate(45deg);
+}
+
+/* 联系我们 */
+.contact-section {
+  margin-bottom: 40rpx;
+}
+
+.contact-title {
+  font-size: 28rpx;
+  color: var(--color-text-light);
+  margin-bottom: 12rpx;
+  padding: 0 10rpx;
+}
+
+.contact-card {
+  background-color: var(--color-card);
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.contact-item {
+  padding: 30rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.contact-email {
+  font-size: 30rpx;
+  color: var(--color-text);
+}
+
+.contact-copy {
+  font-size: 24rpx;
+  color: var(--color-primary);
+}
+
+/* 版权信息 */
+.copyright {
+  text-align: center;
+  font-size: 24rpx;
+  color: var(--color-text-light);
+  margin: 40rpx 0;
+} 

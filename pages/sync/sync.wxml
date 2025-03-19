@@ -1,0 +1,73 @@
+<!--pages/sync/sync.wxml-->
+<view class="container {{theme}}">
+  <!-- iCloud同步设置 -->
+  <view class="settings-section">
+    <view class="settings-title">iCloud同步</view>
+    <view class="settings-card">
+      <view class="settings-item">
+        <view class="settings-item-content">
+          <text class="settings-item-name">启用iCloud同步</text>
+        </view>
+        <switch checked="{{iCloudSync}}" bindchange="toggleICloudSync" color="var(--color-primary)" />
+      </view>
+      
+      <view class="info-item">
+        <text class="info-text">上次同步时间：{{lastSyncTime}}</text>
+      </view>
+      
+      <view class="button-area">
+        <button class="sync-button" bindtap="syncNow" disabled="{{!iCloudSync || syncInProgress}}">立即同步</button>
+      </view>
+    </view>
+    
+    <view class="tip-text">
+      开启iCloud同步后，您的资产数据将会自动同步至iCloud，以便在其他设备上使用。
+    </view>
+  </view>
+  
+  <!-- 本地备份设置 -->
+  <view class="settings-section">
+    <view class="settings-title">本地备份</view>
+    <view class="settings-card">
+      <view class="settings-item">
+        <view class="settings-item-content">
+          <text class="settings-item-name">启用本地备份</text>
+        </view>
+        <switch checked="{{localBackup}}" bindchange="toggleLocalBackup" color="var(--color-primary)" />
+      </view>
+      
+      <view class="info-item">
+        <text class="info-text">上次备份时间：{{lastBackupTime}}</text>
+      </view>
+      
+      <view class="button-area">
+        <button class="sync-button" bindtap="backupNow" disabled="{{!localBackup || backupInProgress}}">立即备份</button>
+        <button class="restore-button" bindtap="restoreBackup" disabled="{{!localBackup || backupInProgress}}">恢复备份</button>
+      </view>
+    </view>
+    
+    <view class="tip-text">
+      本地备份可以保存您的资产数据到本地存储，以防数据丢失。恢复备份时将覆盖当前数据。
+    </view>
+  </view>
+  
+  <!-- 数据同步说明 -->
+  <view class="info-section">
+    <view class="info-card">
+      <view class="info-header">
+        <text class="info-title">数据同步说明</text>
+      </view>
+      <view class="info-content">
+        <text class="info-paragraph">
+          1. iCloud同步能够在您的多个设备间同步数据，前提是设备使用相同的Apple ID。
+        </text>
+        <text class="info-paragraph">
+          2. 本地备份仅保存在当前设备上，更换设备或重新安装小程序后将无法恢复。
+        </text>
+        <text class="info-paragraph">
+          3. 我们建议您定期进行数据备份或开启自动同步，以防数据丢失。
+        </text>
+      </view>
+    </view>
+  </view>
+</view> 

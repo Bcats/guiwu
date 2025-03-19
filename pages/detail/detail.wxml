@@ -1,0 +1,118 @@
+<!--detail.wxml-->
+<view class="container safe-area-bottom safe-area-top" data-theme="{{theme}}">
+  
+  <!-- 加载状态 -->
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading"></view>
+    <view class="loading-text">加载中...</view>
+  </view>
+  
+  <block wx:if="{{!loading && asset}}">
+    <!-- 资产详情卡片 -->
+    <view class="asset-detail-card">
+      <view class="asset-detail-name">{{asset.name}}</view>
+      <view class="asset-detail-days">{{asset.usagePeriod}}</view>
+      
+      <!-- 保修指示器 -->
+      <view class="warranty-indicator" wx:if="{{asset.warrantyDate}}">
+        <block wx:for="{{6}}" wx:key="*this">
+          <view class="warranty-dot {{index < (warranty.status === 'expired' ? 0 : (warranty.status === 'expiring' ? 3 : 6)) ? '' : 'empty'}}"></view>
+        </block>
+      </view>
+      
+      <view class="purchase-date">购买时间: {{asset.formattedPurchaseDate}}</view>
+    </view>
+    
+    <!-- 信息卡片 -->
+    <view class="info-card">
+      <view class="info-item">
+        <view class="info-label">
+          <view class="info-icon icon-price">
+            <text class="fa fa-tag"></text>
+          </view>
+          购入价格
+        </view>
+        <view class="info-value">{{asset.price}}元</view>
+      </view>
+      
+      <view class="info-item">
+        <view class="info-label">
+          <view class="info-icon icon-daily">
+            <text class="fa fa-chart-line"></text>
+          </view>
+          日均
+        </view>
+        <view class="info-value">{{asset.dailyCost}}元/天</view>
+      </view>
+      
+      <view class="info-item">
+        <view class="info-label">
+          <view class="info-icon icon-status">
+            <text class="fa fa-sync-alt"></text>
+          </view>
+          使用状态
+        </view>
+        <view class="info-value">{{asset.status || '使用中'}}</view>
+      </view>
+      
+      <view class="info-item">
+        <view class="info-label">
+          <view class="info-icon icon-category">
+            <text class="fa fa-folder"></text>
+          </view>
+          分类
+        </view>
+        <view class="info-value">{{asset.category || '未分类'}}</view>
+      </view>
+      
+      <view class="info-item" wx:if="{{asset.warrantyDate}}">
+        <view class="info-label">
+          <view class="info-icon icon-warranty">
+            <text class="fa fa-shield-alt"></text>
+          </view>
+          保修状态
+        </view>
+        <view class="info-value {{warranty.status === 'expired' ? 'status-expired' : warranty.status === 'expiring' ? 'status-expiring' : 'status-valid'}}">
+          {{warranty.status === 'expired' ? '已过期' : warranty.status === 'expiring' ? '即将过期 (剩余' + warranty.daysLeft + '天)' : '保修中'}}
+        </view>
+      </view>
+      
+      <view class="info-item" wx:if="{{asset.description}}">
+        <view class="info-label">
+          <view class="info-icon icon-desc">
+            <text class="fa fa-file-alt"></text>
+          </view>
+          描述
+        </view>
+        <view class="info-value">{{asset.description}}</view>
+      </view>
+    </view>
+    
+    <!-- 操作按钮 -->
+    <view class="btn btn-primary" bindtap="goToEdit">
+      <text class="fa fa-edit" style="margin-right: 8px;"></text>编辑
+    </view>
+    <view class="btn btn-danger" bindtap="showDeleteConfirm" style="margin-top: 12px;">
+      <text class="fa fa-trash-alt" style="margin-right: 8px;"></text>删除
+    </view>
+  </block>
+  
+  <!-- 删除确认弹窗 -->
+  <view class="modal-mask" wx:if="{{showDeleteConfirm}}" bindtap="hideDeleteConfirm"></view>
+  <view class="modal-container" wx:if="{{showDeleteConfirm}}">
+    <view class="modal-content">
+      <view style="padding: 20px; text-align: center;">
+        <view class="modal-title">确认删除</view>
+        <view class="modal-icon">
+          <text class="fa fa-exclamation-triangle"></text>
+        </view>
+        <view class="modal-desc">确定要删除"{{asset.name}}"吗？</view>
+        <view class="modal-desc" style="color: #FF3B30; font-weight: 500; margin-bottom: 20px;">此操作不可恢复</view>
+      </view>
+      <view class="modal-buttons">
+        <view class="modal-btn cancel" bindtap="hideDeleteConfirm">取消</view>
+        <view class="modal-btn confirm" bindtap="deleteAsset">删除</view>
+      </view>
+    </view>
+  </view>
+</view> 

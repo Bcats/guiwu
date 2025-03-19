@@ -1,0 +1,143 @@
+<!--pages/index/index.wxml-->
+<wxs module="styleHelper">
+  function buildStyleString(style) {
+    if (!style) return '';
+    var result = '';
+    var keys = Object.keys(style);
+    for (var i = 0; i < keys.length; i++) {
+      var key = keys[i];
+      result += key + ':' + style[key] + ';';
+    }
+    return result;
+  }
+  module.exports = {
+    buildStyle: buildStyleString
+  };
+</wxs>
+
+<view class="container safe-area-bottom safe-area-top" data-theme="{{theme}}" style="{{app.globalData.themeStyle ? styleHelper.buildStyle(app.globalData.themeStyle) : ''}}">
+
+  <!-- 加载状态 -->
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <scroll-view scroll-y="{{true}}" class="container-scroll" wx:else>
+    <!-- 我的资产概览 -->
+    <view class="overview-card">
+      <view class="overview-title">
+        我的资产
+        <view class="dropdown" bindtap="toggleCategoryDropdown">
+          {{selectedCategory}} <text class="fa fa-chevron-down dropdown-icon"></text>
+        </view>
+      </view>
+      <view class="overview-row">
+        <view class="overview-item">
+          <view class="overview-label">总资产</view>
+          <view class="overview-value">¥{{totalValue}}</view>
+        </view>
+        <view class="overview-item">
+          <view class="overview-label">日均成本</view>
+          <view class="overview-value">¥{{dailyAverage}}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 分类下拉选择 -->
+    <view class="category-dropdown" wx:if="{{showCategoryDropdown}}">
+      <view 
+        wx:for="{{categories}}" 
+        wx:key="*this" 
+        class="category-item {{selectedCategory === item ? 'active' : ''}}" 
+        data-category="{{item}}" 
+        bindtap="onCategoryTap"
+      >
+        {{item}}
+      </view>
+    </view>
+
+    <!-- 资产列表 -->
+    <block wx:if="{{filteredAssets.length > 0}}">
+      <view 
+        wx:for="{{filteredAssets}}" 
+        wx:key="id" 
+        class="asset-card-wrapper"
+      >
+        <view 
+          class="asset-card {{currentSlideAssetId === item.id ? 'asset-card-slide-left' : 'asset-card-normal'}}" 
+          data-id="{{item.id}}" 
+          catch:tap="goToDetail"
+          catchtouchstart="onAssetTouchStart"
+          catchtouchmove="onAssetTouchMove"
+          catchtouchend="onAssetTouchEnd"
+        >
+          <!-- 图标部分 -->
+          <view class="asset-icon-wrapper asset-icon-{{item.categoryClass || 'default'}}">
+            <image class="asset-icon-image" src="/assets/icons/items/{{getItemIcon(item.category, item.name)}}.png" mode="aspectFit"></image>
+          </view>
+          
+          <!-- 信息部分 -->
+          <view class="asset-info">
+            <view class="asset-name">{{item.name}}</view>
+            <view class="asset-price">¥{{item.price}} · ¥{{item.dailyCost}}/天</view>
+          </view>
+          
+          <!-- 使用时间 -->
+          <view class="asset-usage">{{item.usageDays}}天</view>
+        </view>
+
+        <!-- 左滑操作按钮 -->
+        <view class="slide-options" wx:if="{{currentSlideAssetId === item.id}}">
+          <view class="option-top" bindtap="topAsset" data-id="{{item.id}}">
+            <text class="fa fa-thumbtack"></text>
+            <text>置顶</text>
+          </view>
+          <view class="option-edit" bindtap="editAsset" data-id="{{item.id}}">
+            <text class="fa fa-edit"></text>
+            <text>编辑</text>
+          </view>
+          <view class="option-delete" bindtap="deleteAsset" data-id="{{item.id}}">
+            <text class="fa fa-trash"></text>
+            <text>删除</text>
+          </view>
+        </view>
+
+        <!-- 资产详情展开部分 -->
+        <view class="asset-detail" wx:if="{{item.expanded}}">
+          <view class="detail-row">
+            <text class="detail-label">购入日期</text>
+            <text class="detail-value">{{item.purchaseDate}}</text>
+          </view>
+          <view class="detail-row">
+            <text class="detail-label">总价格</text>
+            <text class="detail-value">¥{{item.price}}</text>
+          </view>
+          <view class="detail-row">
+            <text class="detail-label">日均成本</text>
+            <text class="detail-value">¥{{item.dailyCost}}/天</text>
+          </view>
+          <view class="detail-row">
+            <text class="detail-label">使用时间</text>
+            <text class="detail-value">{{item.usageDays}}天</text>
+          </view>
+          <view class="detail-actions">
+            <button class="detail-btn" bindtap="navigateToDetail" data-id="{{item.id}}">查看详情</button>  
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:else>
+      <view class="empty-icon fa fa-inbox"></view>
+      <view class="empty-text">还没有添加任何资产</view>
+    </view>
+  </scroll-view>
+
+  <!-- 浮动添加按钮 -->
+  <view class="floating-btn" bindtap="goToAddAsset">
+    <text class="fa fa-plus"></text>
+  </view>
+
+</view> 

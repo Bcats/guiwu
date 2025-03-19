@@ -1,0 +1,36 @@
+<!--components/tabBar/tabBar.wxml-->
+<wxs module="styleHelper">
+  function getThemeStyle(style) {
+    if (!style) return '';
+    
+    var color = style['--color-primary'] || '#2C7EF8';
+    var background = style['--color-background'] || '#F7F8FA';
+    var card = style['--color-card'] || '#FFFFFF';
+    var text = style['--color-text'] || '#333333';
+    var textSecondary = style['--color-text-secondary'] || '#666666';
+    var textLight = style['--color-text-light'] || '#999999';
+    var border = style['--color-border'] || '#EEEEEE';
+    
+    return '--color-primary:' + color + 
+           ';--color-background:' + background + 
+           ';--color-card:' + card + 
+           ';--color-text:' + text + 
+           ';--color-text-secondary:' + textSecondary + 
+           ';--color-text-light:' + textLight + 
+           ';--color-border:' + border;
+  }
+  
+  module.exports = {
+    getStyle: getThemeStyle
+  };
+</wxs>
+
+<view class="tab-bar" data-theme="{{theme}}" style="{{themeStyle ? styleHelper.getStyle(themeStyle) : ''}}">
+  <view class="tab-bar-border"></view>
+  <view wx:for="{{list}}" wx:key="index" class="tab-item {{selected === index ? 'active' : ''}}" data-path="{{item.pagePath}}" data-index="{{index}}" bindtap="switchTab">
+    <view class="tab-icon">
+      <text class="fa {{selected === index ? item.selectedIconClass : item.iconClass}}"></text>
+    </view>
+    <view class="tab-text">{{item.text}}</view>
+  </view>
+</view> 

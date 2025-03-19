@@ -1,0 +1,23 @@
+<view class="card-form">
+  <view class="form-item">
+    <text class="label">卡片名称</text>
+    <input class="input" value="{{card.name}}" bindinput="onNameInput" placeholder="请输入卡片名称"/>
+  </view>
+  <view class="form-item">
+    <text class="label">卡片类型</text>
+    <picker bindchange="onTypeChange" value="{{typeIndex}}" range="{{types}}">
+      <view class="picker" style="background-color: {{typeColors[card.type] || '#ddd'}}">
+        {{card.type || '请选择卡片类型'}}
+      </view>
+    </picker>
+  </view>
+  <view class="form-item">
+    <text class="label">使用次数</text>
+    <input class="input" type="number" value="{{card.useCount}}" bindinput="onUseCountInput" placeholder="请输入使用次数"/>
+  </view>
+  <view class="form-item">
+    <text class="label">描述</text>
+    <textarea class="textarea" value="{{card.description}}" bindinput="onDescriptionInput" placeholder="请输入卡片描述"/>
+  </view>
+  <button class="save-btn" bindtap="onSave">保存</button>
+</view> 

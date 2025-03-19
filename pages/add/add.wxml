@@ -1,0 +1,123 @@
+<!--add.wxml-->
+<view class="container" data-theme="{{theme}}">
+
+  <view class="form-container">
+    <!-- 上传图片区域 -->
+    <view class="upload-area" bindtap="chooseImage">
+      <view class="upload-icon">
+        <text class="fa fa-camera"></text>
+      </view>
+      <view class="upload-text">点击上传资产图片</view>
+      <image wx:if="{{asset.imagePath}}" class="upload-preview" src="{{asset.imagePath}}" mode="aspectFill"></image>
+    </view>
+    
+    <!-- 资产名称 -->
+    <view class="form-group">
+      <view class="form-label">资产名称</view>
+      <input class="form-input" 
+        placeholder="请输入资产名称" 
+        value="{{asset.name}}"
+        bindinput="onInputChange"
+        data-field="name" />
+    </view>
+    
+    <!-- 购入价格 -->
+    <view class="form-group">
+      <view class="form-label">购买价格</view>
+      <input class="form-input" 
+        type="digit"
+        placeholder="请输入购买价格" 
+        value="{{asset.price}}"
+        bindinput="onInputChange"
+        data-field="price" />
+    </view>
+    
+    <!-- 分类 -->
+    <view class="form-group">
+      <view class="form-label">分类</view>
+      <view class="form-input form-select" bindtap="showCategoryPicker">
+        <text>{{asset.category || '请选择分类'}}</text>
+        <text class="fa fa-chevron-down"></text>
+      </view>
+    </view>
+    
+    <!-- 购买日期 -->
+    <view class="form-group">
+      <view class="form-label">购买日期</view>
+      <picker mode="date" 
+        value="{{asset.purchaseDate}}" 
+        bindchange="onPurchaseDateChange">
+        <view class="form-input form-select">
+          <text>{{asset.purchaseDate || '请选择购买日期'}}</text>
+          <text class="fa fa-calendar-alt"></text>
+        </view>
+      </picker>
+    </view>
+  
+    
+    <!-- 保修到期 -->
+    <view class="form-group">
+      <view class="form-label">保修到期</view>
+      <picker mode="date" 
+        value="{{asset.warrantyDate}}" 
+        bindchange="onWarrantyDateChange">
+        <view class="form-input form-select">
+          <text>{{asset.warrantyDate || '请选择保修到期日期'}}</text>
+          <text class="fa fa-calendar-alt"></text>
+        </view>
+      </picker>
+    </view>
+    
+    <!-- 描述 -->
+    <view class="form-group">
+      <view class="form-label">描述</view>
+      <textarea class="form-textarea" 
+        placeholder="请输入备注信息" 
+        value="{{asset.description}}"
+        bindinput="onInputChange"
+        data-field="description"></textarea>
+    </view>
+    
+    <!-- 操作按钮 -->
+    <button class="btn btn-primary" bindtap="saveAsset">完成</button>
+    <button class="btn btn-secondary" bindtap="cancelEdit">取消</button>
+  </view>
+  
+  <!-- 分类选择器 -->
+  <view class="picker-mask" wx:if="{{showCategoryPicker}}" bindtap="hideCategoryPicker"></view>
+  <view class="picker-container {{showCategoryPicker ? 'show' : ''}}">
+    <view class="picker-header">
+      <text>选择分类</text>
+      <text class="fa fa-times" bindtap="hideCategoryPicker"></text>
+    </view>
+    <view class="picker-content">
+      <view class="picker-item" 
+        wx:for="{{categories}}" 
+        wx:key="*this" 
+        bindtap="onCategorySelect"
+        data-category="{{item}}">
+        <text>{{item}}</text>
+        <text class="fa fa-check" wx:if="{{asset.category === item}}"></text>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 状态选择器 -->
+  <view class="picker-mask" wx:if="{{showStatusPicker}}" bindtap="hideStatusPicker"></view>
+  <view class="picker-container {{showStatusPicker ? 'show' : ''}}">
+    <view class="picker-header">
+      <text>选择状态</text>
+      <text class="fa fa-times" bindtap="hideStatusPicker"></text>
+    </view>
+    <view class="picker-content">
+      <view class="picker-item" 
+        wx:for="{{statusOptions}}" 
+        wx:key="*this" 
+        bindtap="onStatusSelect"
+        data-status="{{item}}">
+        <text>{{item}}</text>
+        <text class="fa fa-check" wx:if="{{asset.status === item}}"></text>
+      </view>
+    </view>
+  </view>
+</view> 

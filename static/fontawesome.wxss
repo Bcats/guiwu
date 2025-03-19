@@ -1,0 +1,172 @@
+/**
+ * 归物小程序图标库 - 基于FontAwesome精简版
+ */
+
+@font-face {
+  font-family: 'FontAwesome';
+  src: url('https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/webfonts/fa-solid-900.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.fa {
+  display: inline-block;
+  font: normal normal normal 14px/1 FontAwesome;
+  font-size: inherit;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 首页图标 */
+.fa-home:before {
+  content: "\f015";
+}
+
+/* 统计图标 */
+.fa-chart-pie:before {
+  content: "\f200";
+}
+
+/* 用户图标 */
+.fa-user:before {
+  content: "\f007";
+}
+
+/* 加号图标 */
+.fa-plus:before {
+  content: "\f067";
+}
+
+/* 返回图标 */
+.fa-chevron-left:before {
+  content: "\f053";
+}
+
+/* 价格图标 */
+.fa-yen-sign:before {
+  content: "\f157";
+}
+
+/* 日均图标 */
+.fa-calendar-alt:before {
+  content: "\f073";
+}
+
+/* 状态图标 */
+.fa-check-circle:before {
+  content: "\f058";
+}
+
+/* 分类图标 */
+.fa-tag:before {
+  content: "\f02b";
+}
+
+/* 设置图标 */
+.fa-cog:before {
+  content: "\f013";
+}
+
+/* 同步图标 */
+.fa-sync:before {
+  content: "\f021";
+}
+
+.fa-sync-alt:before {
+  content: "\f2f1";
+}
+
+/* 清除图标 */
+.fa-trash:before {
+  content: "\f1f8";
+}
+
+/* 关于图标 */
+.fa-info-circle:before {
+  content: "\f05a";
+}
+
+/* 上传图标 */
+.fa-upload:before {
+  content: "\f093";
+}
+
+/* 箭头右图标 */
+.fa-chevron-right:before {
+  content: "\f054";
+}
+
+/* 下拉箭头图标 */
+.fa-chevron-down:before {
+  content: "\f078";
+}
+
+/* 排行图标 */
+.fa-crown:before {
+  content: "\f521";
+}
+
+/* 时钟图标 */
+.fa-clock:before {
+  content: "\f017";
+}
+
+/* 编辑图标 */
+.fa-edit:before {
+  content: "\f044";
+}
+
+/* 删除图标 */
+.fa-trash-alt:before {
+  content: "\f2ed";
+}
+
+/* 主题图标 */
+.fa-palette:before {
+  content: "\f53f";
+}
+
+/* 通用图标 */
+.fa-minus:before { content: "\f068"; }
+.fa-check:before { content: "\f00c"; }
+.fa-times:before { content: "\f00d"; }
+.fa-search:before { content: "\f002"; }
+.fa-exclamation-circle:before { content: "\f06a"; }
+.fa-exclamation-triangle:before { content: "\f071"; }
+.fa-question-circle:before { content: "\f059"; }
+.fa-tags:before { content: "\f02c"; }
+.fa-chart-line:before { content: "\f201"; }
+.fa-folder:before { content: "\f07b"; }
+.fa-globe:before { content: "\f0ac"; }
+.fa-envelope:before { content: "\f0e0"; }
+.fa-star:before { content: "\f005"; }
+.fa-shield-alt:before { content: "\f3ed"; }
+.fa-file-alt:before { content: "\f15c"; }
+.fa-file-contract:before { content: "\f56c"; }
+.fa-hdd:before { content: "\f0a0"; }
+.fa-signal:before { content: "\f012"; }
+.fa-wifi:before { content: "\f1eb"; }
+.fa-battery-three-quarters:before { content: "\f241"; }
+.fa-inbox:before { content: "\f01c"; }
+
+/* 分类图标 */
+.fa-mobile-alt:before { content: "\f3cd"; }
+.fa-laptop:before { content: "\f109"; }
+.fa-desktop:before { content: "\f108"; }
+.fa-tv:before { content: "\f26c"; }
+.fa-camera:before { content: "\f030"; }
+.fa-headphones:before { content: "\f025"; }
+.fa-gamepad:before { content: "\f11b"; }
+.fa-couch:before { content: "\f4b8"; }
+.fa-chair:before { content: "\f6c0"; }
+.fa-bed:before { content: "\f236"; }
+.fa-bicycle:before { content: "\f206"; }
+.fa-car:before { content: "\f1b9"; }
+.fa-cube:before { content: "\f1b2"; }
+.fa-tshirt:before { content: "\f553"; }
+.fa-gem:before { content: "\f3a5"; }
+.fa-book:before { content: "\f02d"; }
+.fa-briefcase:before { content: "\f0b1"; }
+.fa-baby:before { content: "\f77c"; }
+.fa-utensils:before { content: "\f2e7"; }
+.fa-tools:before { content: "\f7d9"; } 

@@ -1,0 +1,48 @@
+<!--pages/feedback/feedback.wxml-->
+<wxs module="styleHelper">
+  function buildStyleString(style) {
+    if (!style) return '';
+    var result = '';
+    var keys = Object.keys(style);
+    for (var i = 0; i < keys.length; i++) {
+      var key = keys[i];
+      result += key + ':' + style[key] + ';';
+    }
+    return result;
+  }
+  module.exports = {
+    buildStyle: buildStyleString
+  };
+</wxs>
+
+<view class="container" data-theme="{{theme}}" style="{{app.globalData.themeStyle ? styleHelper.buildStyle(app.globalData.themeStyle) : ''}}">
+  <view class="feedback-header">
+    <view class="feedback-title">意见反馈</view>
+    <view class="feedback-desc">您的反馈是我们改进的动力</view>
+  </view>
+  
+  <view class="feedback-form">
+    <view class="form-item">
+      <view class="form-label">反馈内容</view>
+      <textarea class="feedback-textarea" placeholder="请详细描述您遇到的问题或建议..." value="{{feedbackContent}}" bindinput="onInputFeedback" maxlength="500"></textarea>
+      <view class="textarea-limit">{{feedbackContent.length}}/500</view>
+    </view>
+    
+    <view class="form-item">
+      <view class="form-label">联系方式（选填）</view>
+      <input class="feedback-input" placeholder="邮箱/微信/手机号码" value="{{contactInfo}}" bindinput="onInputContact"></input>
+    </view>
+    
+    <button class="submit-btn {{submitDisabled ? 'disabled' : ''}}" bindtap="submitFeedback" disabled="{{submitDisabled || submitting}}">
+      <text wx:if="{{!submitting}}">提交反馈</text>
+      <view wx:else class="loading"></view>
+    </button>
+  </view>
+  
+  <view class="feedback-tips">
+    <view class="tips-title">小贴士：</view>
+    <view class="tips-item">• 您可以提交使用建议、功能需求或错误报告</view>
+    <view class="tips-item">• 我们会认真阅读每一条反馈</view>
+    <view class="tips-item">• 如果您留下了联系方式，我们可能会联系您了解更多细节</view>
+  </view>
+</view> 

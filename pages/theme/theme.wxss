@@ -1,0 +1,140 @@
+/**theme.wxss**/
+.settings-section {
+  margin-bottom: 30rpx;
+}
+
+.settings-title {
+  font-size: 28rpx;
+  color: var(--color-text-light);
+  margin-bottom: 12rpx;
+  padding: 0 10rpx;
+}
+
+.settings-card {
+  background-color: var(--color-card);
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.settings-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 1rpx solid var(--color-border);
+}
+
+.settings-item:last-child {
+  border-bottom: none;
+}
+
+.settings-item-content {
+  display: flex;
+  align-items: center;
+}
+
+.settings-item-name {
+  font-size: 30rpx;
+  color: var(--color-text);
+}
+
+/* 颜色选择器 */
+.color-grid {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 20rpx;
+}
+
+.color-item {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  margin: 15rpx;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.color-item.selected {
+  transform: scale(1.15);
+  box-shadow: 0 6rpx 12rpx rgba(0, 0, 0, 0.15);
+}
+
+.color-check {
+  width: 30rpx;
+  height: 30rpx;
+  border-radius: 50%;
+  background-color: white;
+  position: relative;
+}
+
+.color-check:after {
+  content: '';
+  position: absolute;
+  width: 15rpx;
+  height: 7rpx;
+  border-left: 3rpx solid #333;
+  border-bottom: 3rpx solid #333;
+  transform: rotate(-45deg);
+  top: 8rpx;
+  left: 7rpx;
+}
+
+/* 预览部分 */
+.preview-section {
+  margin-bottom: 40rpx;
+}
+
+.preview-card {
+  background-color: var(--color-card);
+  border-radius: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
+}
+
+.preview-header {
+  height: 100rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.preview-title {
+  font-size: 36rpx;
+  font-weight: 600;
+}
+
+.preview-content {
+  padding: 20rpx;
+}
+
+.preview-item {
+  height: 40rpx;
+  background-color: var(--color-border);
+  margin-bottom: 20rpx;
+  border-radius: 6rpx;
+}
+
+.preview-item:nth-child(2) {
+  width: 85%;
+}
+
+.preview-item:nth-child(3) {
+  width: 70%;
+}
+
+.preview-button {
+  margin: 20rpx;
+  height: 80rpx;
+  border-radius: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 32rpx;
+  font-weight: 500;
+} 

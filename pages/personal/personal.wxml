@@ -1,0 +1,108 @@
+<!--personal.wxml-->
+<wxs module="styleHelper">
+  function buildStyleString(style) {
+    if (!style) return '';
+    var result = '';
+    var keys = Object.keys(style);
+    for (var i = 0; i < keys.length; i++) {
+      var key = keys[i];
+      result += key + ':' + style[key] + ';';
+    }
+    return result;
+  }
+  module.exports = {
+    buildStyle: buildStyleString
+  };
+</wxs>
+
+<view class="container safe-area-bottom safe-area-top" data-theme="{{theme}}" style="{{app.globalData.themeStyle ? styleHelper.buildStyle(app.globalData.themeStyle) : ''}}">
+  <!-- 加载状态 -->
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading"></view>
+    <view class="loading-text">加载中...</view>
+  </view>
+  
+  <block wx:if="{{!loading}}">
+    <!-- 用户卡片 -->
+    <view class="user-card">
+      <image class="user-avatar" src="{{userInfo.avatarUrl}}"></image>
+      <view class="user-info">
+        <view class="user-nickname">{{userInfo.nickName}}</view>
+        <view class="user-id">ID: {{userInfo.userId}}</view>
+      </view>
+    </view>
+    
+    <!-- 资产统计卡片 -->
+    <view class="stats-card">
+      <view class="stats-item">
+        <view class="stats-value">{{assetStats.count}}</view>
+        <view class="stats-label">资产总数</view>
+      </view>
+      <view class="stats-divider"></view>
+      <view class="stats-item">
+        <view class="stats-value">¥{{assetStats.totalValue}}</view>
+        <view class="stats-label">资产总值</view>
+      </view>
+    </view>
+    
+    <!-- 功能列表 -->
+    <view class="function-list">
+      <!-- 主题设置 -->
+      <view class="function-item" bindtap="goToTheme">
+        <view class="function-icon theme-icon">
+          <text class="fa fa-palette"></text>
+        </view>
+        <view class="function-info">
+          <view class="function-title">主题设置</view>
+          <view class="function-desc">自定义应用主题和颜色</view>
+        </view>
+        <text class="fa fa-chevron-right function-arrow"></text>
+      </view>
+      
+      <!-- 关于应用 -->
+      <view class="function-item" bindtap="goToAbout">
+        <view class="function-icon about-icon">
+          <text class="fa fa-info-circle"></text>
+        </view>
+        <view class="function-info">
+          <view class="function-title">关于归物</view>
+          <view class="function-desc">了解应用的更多信息</view>
+        </view>
+        <text class="fa fa-chevron-right function-arrow"></text>
+      </view>
+      
+      <!-- 分享小程序 -->
+      <view class="function-item" bindtap="onShareAppMessage">
+        <view class="function-icon share-icon">
+          <image class="menu-icon" src="/static/images/share.png" mode="aspectFit"></image>
+        </view>
+        <view class="function-info">
+          <view class="function-title">分享小程序</view>
+          <view class="function-desc">分享给好友或朋友圈</view>
+        </view>
+        <text class="fa fa-chevron-right function-arrow"></text>
+      </view>
+      
+      <!-- 意见反馈 -->
+      <view class="function-item" bindtap="onFeedback">
+        <view class="function-icon feedback-icon">
+          <image class="menu-icon" src="/static/images/feedback.png" mode="aspectFit"></image>
+        </view>
+        <view class="function-info">
+          <view class="function-title">意见反馈</view>
+          <view class="function-desc">帮助我们改进应用</view>
+        </view>
+        <text class="fa fa-chevron-right function-arrow"></text>
+      </view>
+    </view>
+    
+    <!-- 版本信息 -->
+    <view class="version-info">
+      <view class="version-text">归物 v1.0.0</view>
+      <view class="copyright-text">© 2023 归物应用</view>
+    </view>
+  </block>
+  
+  <!-- 使用自定义tabBar组件 -->
+  <tab-bar selected="2"></tab-bar>
+</view> 

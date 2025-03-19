@@ -1,0 +1,723 @@
+/**detail.wxss**/
+/* 详情页头部 */
+.detail-header {
+  height: 56px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  padding: 0 15px;
+  background-color: #fff;
+}
+
+.back-button {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #333;
+  font-size: 18px;
+  border-radius: 18px;
+  background-color: rgba(0, 0, 0, 0.05);
+  transition: background-color 0.2s;
+}
+
+.back-button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.detail-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* 加载动画 */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 100rpx 0;
+}
+
+.loading {
+  width: 60rpx;
+  height: 60rpx;
+  border: 6rpx solid #f3f3f3;
+  border-top: 6rpx solid #2C7EF8;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-text {
+  margin-top: 20rpx;
+  font-size: 28rpx;
+  color: #999;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 详情页资产卡片 */
+.asset-detail-card {
+  background-color: #fff;
+  border-radius: 16px;
+  padding: 25px 20px;
+  color: #333;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  margin-bottom: 16px;
+}
+
+.asset-detail-name {
+  font-size: 22px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.asset-detail-days {
+  font-size: 18px;
+  text-align: center;
+  margin-bottom: 16px;
+  color: #666;
+}
+
+.warranty-indicator {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.warranty-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+  background-color: #2C7EF8;
+  margin: 0 5px;
+}
+
+.warranty-dot.empty {
+  background-color: #e0e0e0;
+}
+
+.purchase-date {
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+}
+
+/* 详情信息卡片 */
+.info-card {
+  background-color: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f2f5;
+}
+
+.info-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.info-item:first-child {
+  padding-top: 0;
+}
+
+.info-label {
+  display: flex;
+  align-items: center;
+  color: #666;
+}
+
+.info-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  font-size: 18px;
+}
+
+.icon-price {
+  background-color: #E5F7FF;
+  color: #09C1DE;
+}
+
+.icon-daily {
+  background-color: #FFF4E5;
+  color: #FF9500;
+}
+
+.icon-status {
+  background-color: #E5FFF1;
+  color: #34C759;
+}
+
+.icon-category {
+  background-color: #F1E5FF;
+  color: #AF52DE;
+}
+
+.icon-warranty {
+  background-color: #FFE5E5;
+  color: #FF3B30;
+}
+
+.icon-desc {
+  background-color: #F5F5F7;
+  color: #8E8E93;
+}
+
+.info-value {
+  font-weight: 500;
+  color: #333;
+}
+
+.status-valid {
+  color: #34C759;
+}
+
+.status-expiring {
+  color: #FF9500;
+}
+
+.status-expired {
+  color: #FF3B30;
+}
+
+/* 按钮样式 */
+.btn {
+  width: 100%;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 600;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn-primary {
+  background-color: #2C7EF8;
+  color: white;
+  box-shadow: 0 8px 15px rgba(44, 126, 248, 0.2);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 12px 20px rgba(44, 126, 248, 0.3);
+}
+
+.btn-danger {
+  background-color: #FF3B30;
+  color: white;
+  box-shadow: 0 8px 15px rgba(255, 59, 48, 0.2);
+}
+
+.btn-danger:hover {
+  box-shadow: 0 12px 20px rgba(255, 59, 48, 0.3);
+}
+
+/* 弹窗 */
+.modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.modal-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  max-width: 320px;
+  z-index: 1001;
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.modal-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 20px;
+  background-color: #FFE5E5;
+  border-radius: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  color: #FF3B30;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.modal-desc {
+  font-size: 15px;
+  color: #333;
+  margin-bottom: 10px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.modal-buttons {
+  display: flex;
+  border-top: 1px solid #f0f2f5;
+}
+
+.modal-btn {
+  flex: 1;
+  padding: 16px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.modal-btn.cancel {
+  color: #333;
+  border-right: 1px solid #f0f2f5;
+}
+
+.modal-btn.confirm {
+  color: #FF3B30;
+}
+
+/* detail.wxss */
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f7f8fa;
+  padding: 30rpx;
+}
+
+/* 资产卡片 */
+.asset-card {
+  background-color: #ffffff;
+  border-radius: 16rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  margin-bottom: 20rpx;
+  overflow: hidden;
+}
+
+.asset-card-main {
+  display: flex;
+  padding: 24rpx;
+  align-items: center;
+  position: relative;
+}
+
+.asset-icon-container {
+  margin-right: 20rpx;
+}
+
+.asset-icon {
+  width: 70rpx;
+  height: 70rpx;
+  border-radius: 14rpx;
+  background-color: #E8F4FF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  color: #007AFF;
+}
+
+.asset-info {
+  flex: 1;
+}
+
+.asset-title {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 6rpx;
+}
+
+.asset-price {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.asset-usage-time {
+  background-color: #F5F5F5;
+  border-radius: 8rpx;
+  padding: 4rpx 12rpx;
+  font-size: 24rpx;
+  color: #666;
+}
+
+/* 卡片展开部分 */
+.asset-card-expand {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  background-color: #F9F9F9;
+}
+
+.asset-card-expand.expanded {
+  max-height: 600rpx; /* 足够大的高度以容纳内容 */
+}
+
+.expand-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 20rpx 24rpx;
+  border-top: 1rpx solid #EEEEEE;
+}
+
+.expand-label {
+  color: #999;
+  font-size: 28rpx;
+}
+
+.expand-value {
+  color: #333;
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+/* 图标样式 - 根据不同分类自定义颜色 */
+.icon-electronic {
+  background-color: #E8F4FF;
+  color: #007AFF;
+}
+
+.icon-furniture {
+  background-color: #EDF8F5;
+  color: #34C759;
+}
+
+.icon-vehicle {
+  background-color: #FDEEEE;
+  color: #FF3B30;
+}
+
+.icon-clothing {
+  background-color: #F2F1FD;
+  color: #5856D6;
+}
+
+.icon-hobby {
+  background-color: #FFF5EC;
+  color: #FF9500;
+}
+
+.icon-kitchen {
+  background-color: #F3F3F3;
+  color: #8E8E93;
+}
+
+.icon-jewelry {
+  background-color: #FFF0F5;
+  color: #FF2D55;
+}
+
+.icon-book {
+  background-color: #E8F6FF;
+  color: #5AC8FA;
+}
+
+.icon-tool {
+  background-color: #F2F2F7;
+  color: #64748B;
+}
+
+.icon-other {
+  background-color: #F5F5F5;
+  color: #8E8E93;
+}
+
+/* 资产信息表格 */
+.asset-info-grid {
+  display: flex;
+  padding: 20rpx 30rpx;
+  background-color: #fff;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.info-row {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.info-label {
+  font-size: 26rpx;
+  color: #999;
+  margin-bottom: 10rpx;
+}
+
+.info-value {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #333;
+}
+
+/* 进度条 */
+.usage-progress-section {
+  padding: 20rpx 30rpx;
+  background-color: #f8fff9;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.progress-percentage {
+  text-align: right;
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #2FC452;
+  margin-bottom: 10rpx;
+}
+
+.progress-bar {
+  position: relative;
+  height: 12rpx;
+  background-color: #eaeaea;
+  border-radius: 6rpx;
+  overflow: hidden;
+  margin-bottom: 10rpx;
+}
+
+.progress-filled {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background-color: #2FC452;
+  border-radius: 6rpx;
+}
+
+.progress-indicator {
+  position: absolute;
+  top: -4rpx;
+  right: 0;
+  width: 20rpx;
+  height: 20rpx;
+  background-color: #fff;
+  border: 3rpx solid #2FC452;
+  border-radius: 50%;
+  transform: translateX(50%);
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 24rpx;
+  color: #666;
+}
+
+/* 详细信息部分 */
+.detail-section {
+  padding: 20rpx 30rpx;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16rpx 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.detail-value {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+/* 操作按钮 */
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 30rpx;
+}
+
+.action-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff;
+  border-radius: 20rpx;
+  padding: 30rpx 20rpx;
+  margin: 0 10rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+  color: #666;
+  font-size: 28rpx;
+}
+
+.action-btn:first-child {
+  margin-left: 0;
+}
+
+.action-btn:last-child {
+  margin-right: 0;
+}
+
+.action-icon {
+  width: 48rpx;
+  height: 48rpx;
+  margin-bottom: 10rpx;
+}
+
+.action-btn.retire {
+  color: #FF9500;
+}
+
+.action-btn.delete {
+  color: #FF3B30;
+}
+
+.action-btn.edit {
+  color: #2FC452;
+}
+
+/* 删除确认弹窗 */
+.modal-mask {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.modal-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: transparent;
+  z-index: 1001;
+  transition: transform 0.3s ease;
+}
+
+.modal-content {
+  background-color: #fff;
+  border-radius: 20rpx 20rpx 0 0;
+  overflow: hidden;
+}
+
+.modal-title {
+  font-size: 36rpx;
+  font-weight: 500;
+  margin-bottom: 20rpx;
+}
+
+.modal-icon {
+  font-size: 70rpx;
+  color: #FF3B30;
+  margin-bottom: 20rpx;
+}
+
+.modal-desc {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 10rpx;
+}
+
+.modal-buttons {
+  display: flex;
+  border-top: 1px solid #eee;
+}
+
+.modal-btn {
+  flex: 1;
+  text-align: center;
+  padding: 30rpx 0;
+  font-size: 32rpx;
+}
+
+.modal-btn.cancel {
+  color: #666;
+  border-right: 1px solid #eee;
+}
+
+.modal-btn.confirm {
+  color: #FF3B30;
+  font-weight: 500;
+}
+
+/* 资产头部图标 */
+.asset-icon {
+  width: 50rpx;
+  height: 50rpx;
+  background-color: #f0f0f0;
+  border-radius: 25rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+}
+
+.asset-info {
+  flex: 1;
+}
+
+.asset-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.asset-price {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.asset-age {
+  font-size: 28rpx;
+  color: #999;
+  background-color: #f7f7f7;
+  padding: 5rpx 10rpx;
+  border-radius: 10rpx;
+} 

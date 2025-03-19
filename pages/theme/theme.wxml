@@ -1,0 +1,50 @@
+<!--pages/theme/theme.wxml-->
+<view class="container {{theme}}">
+  <view class="settings-section">
+    <view class="settings-title">暗色模式</view>
+    <view class="settings-card">
+      <view class="settings-item">
+        <view class="settings-item-content">
+          <text class="settings-item-name">暗色模式</text>
+        </view>
+        <switch checked="{{theme === 'dark'}}" bindchange="toggleTheme" color="{{themeColor}}" />
+      </view>
+    </view>
+  </view>
+  
+  <view class="settings-section">
+    <view class="settings-title">主题色</view>
+    <view class="settings-card">
+      <view class="color-grid">
+        <view 
+          class="color-item {{selectedColor === color.name ? 'selected' : ''}}" 
+          style="background-color: {{color.value}};"
+          wx:for="{{colors}}" 
+          wx:for-item="color" 
+          wx:key="name"
+          data-name="{{color.name}}"
+          data-value="{{color.value}}"
+          bindtap="selectColor">
+          <view class="color-check" wx:if="{{selectedColor === color.name}}"></view>
+        </view>
+      </view>
+    </view>
+  </view>
+  
+  <view class="preview-section">
+    <view class="settings-title">效果预览</view>
+    <view class="preview-card">
+      <view class="preview-header" style="background-color: {{themeColor}};">
+        <text class="preview-title">归物</text>
+      </view>
+      <view class="preview-content">
+        <view class="preview-item"></view>
+        <view class="preview-item"></view>
+        <view class="preview-item"></view>
+      </view>
+      <view class="preview-button" style="background-color: {{themeColor}};">
+        <text>按钮</text>
+      </view>
+    </view>
+  </view>
+</view> 
