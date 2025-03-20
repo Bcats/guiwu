@@ -1,7 +1,6 @@
 // pages/personal/personal.js
 const app = getApp();
 const { getUserInfo, userLogout } = require('../../utils/user');
-const { getAssetStats } = require('../../utils/assets');
 const { setTheme, getTheme } = require('../../utils/theme');
 const assetManager = require('../../utils/assetManager');
 

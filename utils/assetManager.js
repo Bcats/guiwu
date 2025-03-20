@@ -3,6 +3,15 @@
  * 提供资产的增删改查等功能
  */
 
+/**
+ * 生成唯一ID
+ * @returns {string} 唯一ID
+ */
+function generateId() {
+  // 使用时间戳和随机数组合生成唯一ID
+  return 'asset_' + Date.now() + '_' + Math.random().toString(36).substring(2, 15);
+}
+
 const assetManager = {
   /**
    * 获取所有资产列表
@@ -53,6 +62,10 @@ const assetManager = {
         // 添加新资产，生成ID
         if (!asset.id) {
           asset.id = generateId();
+        }
+        // 添加创建时间字段，如果不存在
+        if (!asset.createTime) {
+          asset.createTime = new Date().toISOString();
         }
         assets.unshift(asset); // 添加到数组开头
       }

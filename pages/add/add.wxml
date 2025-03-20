@@ -1,86 +1,129 @@
 <!--add.wxml-->
 <view class="container" data-theme="{{theme}}">
-
-  <view class="form-container">
-    <!-- 上传图片区域 -->
-    <view class="upload-area" bindtap="chooseImage">
-      <view class="upload-icon">
-        <text class="fa fa-camera"></text>
-      </view>
-      <view class="upload-text">点击上传资产图片</view>
-      <image wx:if="{{asset.imagePath}}" class="upload-preview" src="{{asset.imagePath}}" mode="aspectFill"></image>
-    </view>
-    
-    <!-- 资产名称 -->
-    <view class="form-group">
-      <view class="form-label">资产名称</view>
-      <input class="form-input" 
-        placeholder="请输入资产名称" 
-        value="{{asset.name}}"
-        bindinput="onInputChange"
-        data-field="name" />
-    </view>
-    
-    <!-- 购入价格 -->
-    <view class="form-group">
-      <view class="form-label">购买价格</view>
-      <input class="form-input" 
-        type="digit"
-        placeholder="请输入购买价格" 
-        value="{{asset.price}}"
-        bindinput="onInputChange"
-        data-field="price" />
-    </view>
-    
-    <!-- 分类 -->
-    <view class="form-group">
-      <view class="form-label">分类</view>
-      <view class="form-input form-select" bindtap="showCategoryPicker">
-        <text>{{asset.category || '请选择分类'}}</text>
-        <text class="fa fa-chevron-down"></text>
-      </view>
-    </view>
-    
-    <!-- 购买日期 -->
-    <view class="form-group">
-      <view class="form-label">购买日期</view>
-      <picker mode="date" 
-        value="{{asset.purchaseDate}}" 
-        bindchange="onPurchaseDateChange">
-        <view class="form-input form-select">
-          <text>{{asset.purchaseDate || '请选择购买日期'}}</text>
-          <text class="fa fa-calendar-alt"></text>
+  <scroll-view scroll-y="true" class="content-scroll">
+    <view class="form-container">
+      <!-- 图标选择区 -->
+      <view class="form-section">
+        <view class="form-item">
+          <text class="icon-title">选择图标</text>
+          <view class="icon-selector" bindtap="showIconPicker">
+            <view class="selected-icon">
+              <text class="fa {{selectedIcon || 'fa-tag'}}"></text>
+            </view>
+          </view>
         </view>
-      </picker>
+      </view>
+      
+      <!-- 基本信息 -->
+      <view class="form-section">
+        <!-- 资产名称 -->
+        <view class="form-item">
+          <view class="item-icon">
+            <text class="icon icon-tag"></text>
+          </view>
+          <text class="form-label">资产名称</text>
+          <input class="form-input" placeholder="请输入资产名称" value="{{name}}" bindinput="bindKeyInput" data-field="name" />
+        </view>
+        
+        <!-- 购买价格 -->
+        <view class="form-item">
+          <view class="item-icon">
+            <text class="icon icon-price"></text>
+          </view>
+          <text class="form-label">购买价格</text>
+          <input class="form-input" type="digit" placeholder="请输入金额" value="{{price}}" bindinput="bindKeyInput" data-field="price" />
+          <text class="unit-text">元</text>
+        </view>
+        
+        <!-- 购买日期 -->
+        <view class="form-item">
+          <view class="item-icon">
+            <text class="icon icon-calendar"></text>
+          </view>
+          <text class="form-label">购买日期</text>
+          <picker mode="date" bindchange="bindDateChange" data-field="purchaseDate" value="{{purchaseDate}}">
+            <view class="form-input picker-view">
+              <text>{{purchaseDate || '选择日期'}}</text>
+            </view>
+          </picker>
+          <text class="chevron-right icon icon-right"></text>
+        </view>
+        
+        <!-- 资产分类 -->
+        <view class="form-item">
+          <view class="item-icon">
+            <text class="icon icon-folder"></text>
+          </view>
+          <text class="form-label">资产分类</text>
+          <view class="form-input picker-view" bindtap="showCategoryPicker">
+            <text>{{categoryText || '选择分类'}}</text>
+          </view>
+          <text class="chevron-right icon icon-right"></text>
+        </view>
+      </view>
+      
+      <!-- 附加信息 -->
+      <view class="form-section">
+        <!-- 保修日期 -->
+        <view class="form-item">
+          <view class="item-icon">
+            <text class="icon icon-shield"></text>
+          </view>
+          <text class="form-label">保修日期</text>
+          <picker mode="date" bindchange="bindDateChange" data-field="warrantyDate" value="{{warrantyDate}}">
+            <view class="form-input picker-view">
+              <text>{{warrantyDate || '选择日期'}}</text>
+            </view>
+          </picker>
+          <text class="chevron-right icon icon-right"></text>
+        </view>
+      </view>
+        
+      <!-- 图片上传区域 -->
+      <view class="form-section">
+        <view class="photo-header">
+          <text class="photo-title">上传照片</text>
+          <text class="photo-desc">{{tempImagePaths.length}}/9</text>
+        </view>
+        
+        <!-- 图片预览区域 -->
+        <view class="image-preview-list" wx:if="{{tempImagePaths && tempImagePaths.length > 0}}">
+          <view class="image-preview-item" wx:for="{{tempImagePaths}}" wx:key="index">
+            <image class="preview-image" src="{{item}}" mode="aspectFill"></image>
+            <view class="delete-image" catchtap="deleteImage" data-index="{{index}}">
+              <text class="icon icon-close"></text>
+            </view>
+          </view>
+          <view class="image-preview-item add-more" wx:if="{{tempImagePaths.length < 9}}" bindtap="chooseImage">
+            <text class="icon icon-plus"></text>
+          </view>
+        </view>
+        
+        <!-- 空状态上传区 -->
+        <view class="upload-area" bindtap="chooseImage" wx:if="{{!tempImagePaths || tempImagePaths.length === 0}}">
+          <view class="upload-content">
+            <text class="icon icon-camera"></text>
+            <text class="upload-text">点击上传照片</text>
+          </view>
+        </view>
+      </view>
+      
+      <!-- 备注区域 -->
+      <view class="form-section">
+        <view class="remark-header">
+          <text class="remark-title">备注</text>
+        </view>
+        <view class="remark-content">
+          <textarea class="form-textarea" placeholder="添加备注信息..." value="{{description}}" bindinput="bindKeyInput" data-field="description" maxlength="500" />
+        </view>
+      </view>
     </view>
+  </scroll-view>
   
-    
-    <!-- 保修到期 -->
-    <view class="form-group">
-      <view class="form-label">保修到期</view>
-      <picker mode="date" 
-        value="{{asset.warrantyDate}}" 
-        bindchange="onWarrantyDateChange">
-        <view class="form-input form-select">
-          <text>{{asset.warrantyDate || '请选择保修到期日期'}}</text>
-          <text class="fa fa-calendar-alt"></text>
-        </view>
-      </picker>
-    </view>
-    
-    <!-- 描述 -->
-    <view class="form-group">
-      <view class="form-label">描述</view>
-      <textarea class="form-textarea" 
-        placeholder="请输入备注信息" 
-        value="{{asset.description}}"
-        bindinput="onInputChange"
-        data-field="description"></textarea>
-    </view>
-    
-    <!-- 操作按钮 -->
-    <button class="btn btn-primary" bindtap="saveAsset">完成</button>
-    <button class="btn btn-secondary" bindtap="cancelEdit">取消</button>
+  <!-- 底部按钮 -->
+  <view class="bottom-buttons">
+    <view class="btn btn-secondary" bindtap="cancelAdd">取消</view>
+    <view class="btn btn-primary" bindtap="saveAsset">保存</view>
   </view>
   
   <!-- 分类选择器 -->
@@ -88,35 +131,67 @@
   <view class="picker-container {{showCategoryPicker ? 'show' : ''}}">
     <view class="picker-header">
       <text>选择分类</text>
-      <text class="fa fa-times" bindtap="hideCategoryPicker"></text>
+      <text class="icon icon-close" bindtap="hideCategoryPicker"></text>
     </view>
     <view class="picker-content">
-      <view class="picker-item" 
-        wx:for="{{categories}}" 
-        wx:key="*this" 
-        bindtap="onCategorySelect"
-        data-category="{{item}}">
-        <text>{{item}}</text>
-        <text class="fa fa-check" wx:if="{{asset.category === item}}"></text>
+      <view class="picker-item" wx:for="{{categoryList}}" wx:key="id" bindtap="selectCategory" data-category="{{item}}">
+        <text>{{item.name}}</text>
+        <text class="icon icon-check" wx:if="{{categoryId === item.id}}"></text>
       </view>
     </view>
   </view>
   
-  <!-- 状态选择器 -->
-  <view class="picker-mask" wx:if="{{showStatusPicker}}" bindtap="hideStatusPicker"></view>
-  <view class="picker-container {{showStatusPicker ? 'show' : ''}}">
+  <!-- 图标选择器 -->
+  <view class="picker-mask" wx:if="{{showIconPicker}}" bindtap="hideIconPicker"></view>
+  <view class="picker-container {{showIconPicker ? 'show' : ''}}">
     <view class="picker-header">
-      <text>选择状态</text>
-      <text class="fa fa-times" bindtap="hideStatusPicker"></text>
+      <text>选择图标</text>
+      <text class="icon icon-close" bindtap="hideIconPicker"></text>
     </view>
     <view class="picker-content">
-      <view class="picker-item" 
-        wx:for="{{statusOptions}}" 
-        wx:key="*this" 
-        bindtap="onStatusSelect"
-        data-status="{{item}}">
-        <text>{{item}}</text>
-        <text class="fa fa-check" wx:if="{{asset.status === item}}"></text>
+      <view class="icon-grid">
+        <view class="icon-item {{selectedIcon === 'fa-laptop' ? 'selected' : ''}}" bindtap="selectIcon" data-icon="fa-laptop">
+          <text class="icon icon-laptop"></text>
+        </view>
+        <view class="icon-item {{selectedIcon === 'fa-mobile' ? 'selected' : ''}}" bindtap="selectIcon" data-icon="fa-mobile">
+          <text class="icon icon-mobile"></text>
+        </view>
+        <view class="icon-item {{selectedIcon === 'fa-car' ? 'selected' : ''}}" bindtap="selectIcon" data-icon="fa-car">
+          <text class="icon icon-car"></text>
+        </view>
+        <view class="icon-item {{selectedIcon === 'fa-home' ? 'selected' : ''}}" bindtap="selectIcon" data-icon="fa-home">
+          <text class="icon icon-home"></text>
+        </view>
+        <view class="icon-item {{selectedIcon === 'fa-suitcase' ? 'selected' : ''}}" bindtap="selectIcon" data-icon="fa-suitcase">
+          <text class="icon icon-suitcase"></text>
+        </view>
+        <view class="icon-item {{selectedIcon === 'fa-camera' ? 'selected' : ''}}" bindtap="selectIcon" data-icon="fa-camera">
+          <text class="icon icon-camera"></text>
+        </view>
+        <view class="icon-item {{selectedIcon === 'fa-headphones' ? 'selected' : ''}}" bindtap="selectIcon" data-icon="fa-headphones">
+          <text class="icon icon-headphones"></text>
+        </view>
+        <view class="icon-item {{selectedIcon === 'fa-gamepad' ? 'selected' : ''}}" bindtap="selectIcon" data-icon="fa-gamepad">
+          <text class="icon icon-gamepad"></text>
+        </view>
+        <view class="icon-item {{selectedIcon === 'fa-bicycle' ? 'selected' : ''}}" bindtap="selectIcon" data-icon="fa-bicycle">
+          <text class="icon icon-bicycle"></text>
+        </view>
+        <view class="icon-item {{selectedIcon === 'fa-tv' ? 'selected' : ''}}" bindtap="selectIcon" data-icon="fa-tv">
+          <text class="icon icon-tv"></text>
+        </view>
+        <view class="icon-item {{selectedIcon === 'fa-book' ? 'selected' : ''}}" bindtap="selectIcon" data-icon="fa-book">
+          <text class="icon icon-book"></text>
+        </view>
+        <view class="icon-item {{selectedIcon === 'fa-diamond' ? 'selected' : ''}}" bindtap="selectIcon" data-icon="fa-diamond">
+          <text class="icon icon-diamond"></text>
+        </view>
+        <view class="icon-item {{selectedIcon === 'fa-gift' ? 'selected' : ''}}" bindtap="selectIcon" data-icon="fa-gift">
+          <text class="icon icon-gift"></text>
+        </view>
+        <view class="icon-item {{selectedIcon === 'fa-tag' ? 'selected' : ''}}" bindtap="selectIcon" data-icon="fa-tag">
+          <text class="icon icon-tag"></text>
+        </view>
       </view>
     </view>
   </view>

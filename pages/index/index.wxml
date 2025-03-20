@@ -23,7 +23,7 @@
     <text class="loading-text">加载中...</text>
   </view>
 
-  <scroll-view scroll-y="{{true}}" class="container-scroll" wx:else>
+  <view class="container-scroll" wx:else>
     <!-- 我的资产概览 -->
     <view class="overview-card">
       <view class="overview-title">
@@ -51,7 +51,7 @@
         wx:key="*this" 
         class="category-item {{selectedCategory === item ? 'active' : ''}}" 
         data-category="{{item}}" 
-        bindtap="onCategoryTap"
+        bindtap="selectCategory"
       >
         {{item}}
       </view>
@@ -73,8 +73,8 @@
           catchtouchend="onAssetTouchEnd"
         >
           <!-- 图标部分 -->
-          <view class="asset-icon-wrapper asset-icon-{{item.categoryClass || 'default'}}">
-            <image class="asset-icon-image" src="/assets/icons/items/{{getItemIcon(item.category, item.name)}}.png" mode="aspectFit"></image>
+          <view class="asset-icon-wrapper">
+            <text class="fa {{item.category ? 'fa-'+categoryStyles[item.category].icon : 'fa-cube'}}"></text>
           </view>
           
           <!-- 信息部分 -->
@@ -122,7 +122,7 @@
             <text class="detail-value">{{item.usageDays}}天</text>
           </view>
           <view class="detail-actions">
-            <button class="detail-btn" bindtap="navigateToDetail" data-id="{{item.id}}">查看详情</button>  
+            <button class="detail-btn" bindtap="goToDetail" data-id="{{item.id}}">查看详情</button>  
           </view>
         </view>
       </view>
@@ -133,10 +133,10 @@
       <view class="empty-icon fa fa-inbox"></view>
       <view class="empty-text">还没有添加任何资产</view>
     </view>
-  </scroll-view>
+  </view>
 
   <!-- 浮动添加按钮 -->
-  <view class="floating-btn" bindtap="goToAddAsset">
+  <view class="floating-btn" bindtap="goToAdd">
     <text class="fa fa-plus"></text>
   </view>
 

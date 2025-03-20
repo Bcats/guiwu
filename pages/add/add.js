@@ -38,7 +38,34 @@ Page({
     theme: 'light',
     // 是否需要刷新
     needRefresh: false,
-    isEditing: false
+    isEditing: false,
+    // 资产信息
+    id: null, // 编辑模式下的资产ID
+    name: '', // 资产名称
+    price: '', // 购买价格
+    categoryId: '', // 分类ID
+    categoryText: '', // 分类文本
+    purchaseDate: '', // 购买日期
+    warrantyDate: '', // 保修日期
+    description: '', // 备注描述
+    tempImagePaths: [], // 临时图片路径数组
+    selectedIcon: '', // 选中的图标
+    // 选择器状态
+    showIconPicker: false,
+    // 分类列表
+    categoryList: [
+      { id: 1, name: '电子数码' },
+      { id: 2, name: '家居家电' },
+      { id: 3, name: '服装配饰' },
+      { id: 4, name: '珠宝首饰' },
+      { id: 5, name: '书籍文具' },
+      { id: 6, name: '运动户外' },
+      { id: 7, name: '交通工具' },
+      { id: 8, name: '收藏品' },
+      { id: 9, name: '其他' }
+    ],
+    // 编辑模式
+    isEditMode: false
   },
 
   onLoad: function(options) {
@@ -59,8 +86,11 @@ Page({
         this.setData({
           asset: asset,
           originalAsset: { ...asset },
-          isEditing: true
+          isEditing: true,
+          id: options.id,
+          isEditMode: true
         });
+        this.loadAssetData(options.id);
       } else {
         wx.showToast({
           title: '资产不存在',
@@ -76,6 +106,46 @@ Page({
     wx.setNavigationBarTitle({
       title: this.data.pageType === 'add' ? '添加资产' : '编辑资产'
     });
+
+    // 设置默认日期为今天
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day}`;
+    
+    // 设置默认分类为"其他"
+    const otherCategory = this.data.categoryList.find(c => c.name === '其他');
+    
+    this.setData({
+      purchaseDate: formattedDate,
+      categoryId: otherCategory.id,
+      categoryText: otherCategory.name
+    });
+  },
+  
+  // 加载资产数据（编辑模式）
+  loadAssetData: function(id) {
+    // 这里应该从数据库获取资产数据
+    // 为简化示例，这里假设从全局数据获取
+    const assetList = wx.getStorageSync('assetList') || [];
+    const asset = assetList.find(item => item.id === id);
+    
+    if (asset) {
+      const category = this.data.categoryList.find(c => c.id === asset.categoryId);
+      
+      this.setData({
+        name: asset.name,
+        price: asset.price,
+        categoryId: asset.categoryId || '',
+        categoryText: category ? category.name : '',
+        purchaseDate: asset.purchaseDate,
+        warrantyDate: asset.warrantyDate || '',
+        description: asset.description || '',
+        selectedIcon: asset.icon || '',
+        tempImagePaths: asset.imagePaths || []
+      });
+    }
   },
   
   // 页面卸载时设置全局数据，通知首页需要刷新
@@ -116,11 +186,12 @@ Page({
   },
   
   // 选择分类
-  onCategorySelect: function(e) {
-    const { category } = e.currentTarget.dataset;
+  selectCategory: function(e) {
+    const category = e.currentTarget.dataset.category;
     
     this.setData({
-      'asset.category': category,
+      categoryId: category.id,
+      categoryText: category.name,
       showCategoryPicker: false
     });
   },
@@ -170,105 +241,189 @@ Page({
     });
   },
   
-  // 保存资产
-  saveAsset: function() {
-    const { asset, pageType, isEditing } = this.data;
+  // 选择图片
+  chooseImage: function() {
+    const currentCount = this.data.tempImagePaths ? this.data.tempImagePaths.length : 0;
+    const remaining = 9 - currentCount;
     
-    // 校验必填字段
-    if (!asset.name.trim()) {
+    if (remaining <= 0) {
+      wx.showToast({
+        title: '最多只能上传9张图片',
+        icon: 'none'
+      });
+      return;
+    }
+    
+    wx.chooseImage({
+      count: remaining,
+      sizeType: ['compressed'],
+      sourceType: ['album', 'camera'],
+      success: (res) => {
+        // 合并已有图片和新选择的图片
+        const newImagePaths = res.tempFilePaths;
+        const allImagePaths = this.data.tempImagePaths ? [...this.data.tempImagePaths, ...newImagePaths] : [...newImagePaths];
+        
+        this.setData({
+          tempImagePaths: allImagePaths
+        });
+      }
+    });
+  },
+  
+  // 删除图片
+  deleteImage: function(e) {
+    const index = e.currentTarget.dataset.index;
+    const tempImagePaths = this.data.tempImagePaths;
+    
+    // 从数组中移除指定索引的图片
+    tempImagePaths.splice(index, 1);
+    
+    this.setData({
+      tempImagePaths: tempImagePaths
+    });
+  },
+  
+  // 绑定输入框变化
+  bindKeyInput: function(e) {
+    const field = e.currentTarget.dataset.field;
+    const value = e.detail.value;
+    
+    this.setData({
+      [field]: value
+    });
+  },
+  
+  // 绑定日期选择器变化
+  bindDateChange: function(e) {
+    const field = e.currentTarget.dataset.field;
+    const value = e.detail.value;
+    
+    this.setData({
+      [field]: value
+    });
+  },
+  
+  // 显示图标选择器
+  showIconPicker: function() {
+    this.setData({
+      showIconPicker: true
+    });
+  },
+  
+  // 隐藏图标选择器
+  hideIconPicker: function() {
+    this.setData({
+      showIconPicker: false
+    });
+  },
+  
+  // 选择图标
+  selectIcon: function(e) {
+    const icon = e.currentTarget.dataset.icon;
+    
+    this.setData({
+      selectedIcon: icon,
+      showIconPicker: false
+    });
+  },
+  
+  // 验证表单
+  validateForm: function() {
+    // 验证必填字段
+    if (!this.data.name) {
       wx.showToast({
         title: '请输入资产名称',
         icon: 'none'
       });
-      return;
+      return false;
     }
     
-    if (!asset.price || isNaN(parseFloat(asset.price))) {
+    if (!this.data.price) {
       wx.showToast({
-        title: '请输入有效的价格',
+        title: '请输入购买价格',
         icon: 'none'
       });
-      return;
+      return false;
     }
     
-    if (!asset.purchaseDate) {
+    if (!this.data.purchaseDate) {
       wx.showToast({
         title: '请选择购买日期',
         icon: 'none'
       });
+      return false;
+    }
+    
+    return true;
+  },
+  
+  // 保存资产
+  saveAsset: function() {
+    // 表单验证
+    if (!this.validateForm()) {
       return;
     }
     
-    // 将价格转为数字
-    asset.price = Number(asset.price);
-    
-    // 计算总价（包含附加费用）
-    const price = parseFloat(asset.price);
-    const additionalCost = asset.additionalCost ? parseFloat(asset.additionalCost) : 0;
-    const totalCost = price + additionalCost;
-    
-    // 获取当前资产列表
-    let assets = wx.getStorageSync('assets') || [];
-    
-    // 创建/更新资产对象
-    const assetToSave = {
-      ...asset,
-      price: price.toFixed(2),
-      additionalCost: additionalCost.toFixed(2),
-      totalCost: totalCost.toFixed(2)
+    // 准备保存的资产数据
+    const assetData = {
+      id: this.data.id || Date.now().toString(), // 新建模式生成ID
+      name: this.data.name,
+      price: parseFloat(this.data.price),
+      categoryId: this.data.categoryId,
+      category: this.data.categoryText,
+      purchaseDate: this.data.purchaseDate,
+      warrantyDate: this.data.warrantyDate || '',
+      description: this.data.description || '',
+      imagePaths: this.data.tempImagePaths || [],
+      icon: this.data.selectedIcon || 'fa-tag', // 默认图标
+      createTime: new Date().getTime()
     };
     
-    if (isEditing && asset.id) {
-      // 编辑现有资产
-      const index = assets.findIndex(a => a.id === asset.id);
-      if (index !== -1) {
-        assets[index] = assetToSave;
-      }
-    } else {
-      // 创建新资产
-      assetToSave.id = Date.now().toString();
-      assetToSave.createdAt = new Date().toISOString();
-      assets.push(assetToSave);
+    // 获取现有资产列表
+    let assetList = wx.getStorageSync('assetList') || [];
+    
+    // 编辑模式：更新现有资产
+    if (this.data.isEditMode) {
+      assetList = assetList.map(item => {
+        if (item.id === assetData.id) {
+          return assetData;
+        }
+        return item;
+      });
+    } 
+    // 新建模式：添加新资产
+    else {
+      assetList.unshift(assetData);
     }
     
     // 保存到本地存储
-    wx.setStorageSync('assets', assets);
+    wx.setStorageSync('assetList', assetList);
     
-    // 设置需要刷新的标记
-    this.setData({
-      needRefresh: true
-    });
-    
+    // 显示成功提示
     wx.showToast({
-      title: pageType === 'add' ? '添加成功' : '更新成功',
-    });
-    
-    // 返回上一页
-    setTimeout(() => {
-      wx.navigateBack();
-    }, 1500);
-  },
-  
-  // 取消编辑
-  cancelEdit: function() {
-    wx.navigateBack();
-  },
-
-  // 选择图片
-  chooseImage: function() {
-    const that = this;
-    wx.chooseImage({
-      count: 1,
-      sizeType: ['compressed'],
-      sourceType: ['album', 'camera'],
-      success: function(res) {
-        const tempFilePath = res.tempFilePaths[0];
-        const asset = that.data.asset;
-        asset.imagePath = tempFilePath;
-        that.setData({
-          asset: asset
-        });
+      title: this.data.isEditMode ? '资产已更新' : '资产已添加',
+      icon: 'success',
+      duration: 2000,
+      success: () => {
+        // 返回上一页
+        setTimeout(() => {
+          // 设置上一页需要刷新的标志
+          const pages = getCurrentPages();
+          if (pages.length > 1) {
+            const prevPage = pages[pages.length - 2];
+            prevPage.setData({
+              needRefresh: true
+            });
+          }
+          
+          wx.navigateBack();
+        }, 2000);
       }
     });
+  },
+  
+  // 取消添加/编辑
+  cancelAdd: function() {
+    wx.navigateBack();
   }
 }); 

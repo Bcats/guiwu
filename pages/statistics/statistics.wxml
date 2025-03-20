@@ -22,7 +22,7 @@
     <view class="loading-text">加载中...</view>
   </view>
   
-  <block wx:if="{{!loading}}">
+  <view class="stats-scroll-view" wx:if="{{!loading}}">
     <!-- 资产概览 -->
     <view class="card">
       <view class="card-header">资产概览</view>
@@ -50,18 +50,9 @@
       
       <!-- 简易饼图 -->
       <view class="chart-container" wx:if="{{categories.length > 0}}">
-        <view class="donut-chart">
-          <view class="donut-segments">
-            <block wx:for="{{categories}}" wx:key="name">
-              <view class="donut-segment" style="transform: rotate({{item.startAngle}}deg);">
-                <view class="donut-segment-inner" style="background-color: {{item.color}}; transform: rotate({{item.sweepAngle}}deg);"></view>
-              </view>
-            </block>
-          </view>
-          <view class="donut-hole">
-            <view class="donut-total-label">总资产</view>
-            <view class="donut-total-value">¥{{overview.totalValue}}</view>
-          </view>
+        <!-- 原生Canvas环形图 -->
+        <view class="chart-box">
+          <canvas canvas-id="pieCanvas" class="pie-canvas"></canvas>
         </view>
         
         <!-- 分类图例 -->
@@ -129,7 +120,7 @@
         <text class="empty-state-text">暂无资产数据</text>
       </view>
     </view>
-  </block>
+  </view>
   
   <!-- 使用自定义tabBar组件 -->
   <tab-bar selected="1"></tab-bar>

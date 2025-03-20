@@ -3,7 +3,7 @@
 .container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100vh;
   background-color: #f7f8fa;
   padding-bottom: 120rpx; /* 添加底部padding，避免内容被tabBar遮挡 */
 }
@@ -12,6 +12,7 @@
   flex: 1;
   background-color: #f7f8fa;
   padding-bottom: 120rpx; /* 确保滚动区域有足够的底部空间 */
+  overflow-y: auto; /* 允许内容滚动 */
 }
 
 /* 状态栏 */
@@ -224,6 +225,12 @@
   justify-content: center;
   margin-right: 20rpx;
   flex-shrink: 0;
+  background-color: #F5F5F5;
+}
+
+.asset-icon-wrapper .fa {
+  font-size: 40rpx;
+  color: #2C7EF8;
 }
 
 .asset-icon-image {

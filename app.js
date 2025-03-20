@@ -16,23 +16,8 @@ App({
     // 初始化首次使用的资产数据，仅用于演示
     this.initDemoAssets();
     
-    // 初始化主题样式变量，防止访问前未定义
-    this.globalData.themeStyle = {
-      '--color-primary': '#2C7EF8',
-      '--color-background': '#F7F8FA',
-      '--color-card': '#FFFFFF',
-      '--color-text': '#333333',
-      '--color-text-secondary': '#666666',
-      '--color-text-light': '#999999',
-      '--color-border': '#EEEEEE'
-    };
-    
-    // 检查是否有已保存的主题设置
-    const savedTheme = wx.getStorageSync('theme') || 'light';
-    const savedThemeColor = wx.getStorageSync('themeColor') || '#2C7EF8';
-    
-    this.setTheme(savedTheme);
-    this.setThemeColor(savedThemeColor);
+    // 初始化主题样式变量
+    this.updateThemeStyle();
     
     // 监听网络状态变化
     wx.onNetworkStatusChange(function(res) {
@@ -55,11 +40,7 @@ App({
     this.globalData.theme = theme;
     wx.setStorageSync('theme', theme);
     
-    // 设置主题相关样式
-    const themeStyle = this.getThemeStyle(theme);
-    this.globalData.themeStyle = themeStyle;
-    
-    // 更新页面主题样式
+    // 更新主题样式
     this.updateThemeStyle();
     
     // 通知所有页面更新主题
@@ -231,10 +212,13 @@ App({
     const hasInitialized = wx.getStorageSync('demoInitialized');
     if (hasInitialized) return;
     
+    // 使用时间戳作为基础ID，确保唯一性
+    const baseTimestamp = Date.now();
+    
     // 示例数据
     const demoAssets = [
       {
-        id: 'asset_' + Date.now() + '_1',
+        id: 'asset_' + baseTimestamp + '_1',
         name: 'iPhone 12 Pro',
         category: '电子产品',
         price: 9299,
@@ -242,10 +226,11 @@ App({
         description: '深空灰 256GB',
         status: '使用中',
         targetDate: '2026-01-01',
-        expectedDailyCost: 5.91
+        expectedDailyCost: 5.91,
+        createTime: new Date('2022-01-01').toISOString()
       },
       {
-        id: 'asset_' + Date.now() + '_2',
+        id: 'asset_' + baseTimestamp + '_2',
         name: 'MacBook Pro',
         category: '电子产品',
         price: 12800,
@@ -253,10 +238,11 @@ App({
         description: 'M1芯片 16GB内存',
         status: '使用中',
         targetDate: '2025-02-15',
-        expectedDailyCost: 17.5
+        expectedDailyCost: 17.5,
+        createTime: new Date('2021-02-15').toISOString()
       },
       {
-        id: 'asset_' + Date.now() + '_3',
+        id: 'asset_' + baseTimestamp + '_3',
         name: 'Sony A7m4',
         category: '摄影器材',
         price: 14800,
@@ -265,10 +251,11 @@ App({
         status: '使用中',
         targetDate: '2027-06-01',
         expectedDailyCost: 264.3,
-        usageType: '次'
+        usageType: '次',
+        createTime: new Date('2022-06-01').toISOString()
       },
       {
-        id: 'asset_' + Date.now() + '_4',
+        id: 'asset_' + baseTimestamp + '_4',
         name: '平衡车',
         category: '交通工具',
         price: 3583,
@@ -276,10 +263,11 @@ App({
         description: '电动代步工具',
         status: '使用中',
         targetDate: '2023-06-18',
-        expectedDailyCost: 2.5
+        expectedDailyCost: 2.5,
+        createTime: new Date('2019-06-18').toISOString()
       },
       {
-        id: 'asset_' + Date.now() + '_5',
+        id: 'asset_' + baseTimestamp + '_5',
         name: 'Sony PS5',
         category: '娱乐',
         price: 3500,
@@ -287,7 +275,8 @@ App({
         description: '游戏主机',
         status: '使用中',
         targetDate: '2026-10-01',
-        expectedDailyCost: 20.7
+        expectedDailyCost: 20.7,
+        createTime: new Date('2022-10-01').toISOString()
       }
     ];
     
@@ -298,33 +287,12 @@ App({
     console.log('初始化演示资产数据完成');
   },
 
-  // 获取主题样式
-  getThemeStyle: function(theme) {
-    const themeStyles = {
-      light: {
-        '--color-bg': '#f7f8fa',
-        '--color-card': '#ffffff',
-        '--color-text': '#333333',
-        '--color-text-secondary': '#666666',
-        '--color-primary': '#2C7EF8',
-        '--color-border': '#e0e0e0'
-      },
-      dark: {
-        '--color-bg': '#1a1a1a',
-        '--color-card': '#2c2c2c',
-        '--color-text': '#f0f0f0',
-        '--color-text-secondary': '#a0a0a0',
-        '--color-primary': '#3a86ff',
-        '--color-border': '#444444'
-      }
-    };
-    
-    return themeStyles[theme] || themeStyles.light;
-  },
-
   // 初始化主题
   initTheme: function() {
     const theme = wx.getStorageSync('theme') || 'light';
-    this.setTheme(theme);
+    const themeColor = wx.getStorageSync('themeColor') || '#2C7EF8';
+    
+    this.globalData.theme = theme;
+    this.globalData.themeColor = themeColor;
   },
 });

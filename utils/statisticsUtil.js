@@ -117,29 +117,44 @@ const statisticsUtil = {
     
     // 按月统计资产增加情况
     assets.forEach(asset => {
-      // 处理iOS兼容性问题
+      // 优先使用 createTime，其次使用 purchaseDate，最后使用当前时间
       let dateStr = asset.createTime || asset.purchaseDate;
+      if (!dateStr) {
+        console.warn('资产无日期信息:', asset.name || asset.id);
+        return; // 跳过没有日期的资产
+      }
+      
       let date;
-      if (typeof dateStr === 'string') {
-        date = new Date(dateStr.replace(/-/g, '/'));
-      } else {
-        date = new Date();
+      try {
+        // 处理不同格式的日期字符串
+        if (typeof dateStr === 'string') {
+          // 替换日期格式中的连字符，确保兼容iOS
+          date = new Date(dateStr.replace(/-/g, '/'));
+          
+          // 检查日期是否有效
+          if (isNaN(date.getTime())) {
+            console.warn('无效的日期格式:', dateStr);
+            return; // 跳过无效日期
+          }
+        } else {
+          date = new Date();
+        }
+        
+        const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        
+        if (!monthlyData[yearMonth]) {
+          monthlyData[yearMonth] = {
+            month: yearMonth,
+            count: 0,
+            value: 0
+          };
+        }
+        
+        monthlyData[yearMonth].count += 1;
+        monthlyData[yearMonth].value += Number(asset.price) || 0;
+      } catch (error) {
+        console.error('处理资产日期出错:', error);
       }
-      
-      if (isNaN(date.getTime())) return;
-      
-      const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      
-      if (!monthlyData[yearMonth]) {
-        monthlyData[yearMonth] = {
-          month: yearMonth,
-          count: 0,
-          value: 0
-        };
-      }
-      
-      monthlyData[yearMonth].count += 1;
-      monthlyData[yearMonth].value += Number(asset.price) || 0;
     });
     
     // 转换为数组并按时间排序

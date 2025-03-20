@@ -38,13 +38,11 @@ Component({
    */
   methods: {
     switchTab(e) {
-      console.log('TabBar.switchTab 被调用，当前索引:', this.data.selected, '目标索引:', e.currentTarget.dataset.index);
       const data = e.currentTarget.dataset;
       const url = data.path;
       
       // 如果点击的就是当前页，不做跳转
       if (this.data.selected === data.index) {
-        console.log('已经在当前页面，不执行跳转');
         return;
       }
       
@@ -53,7 +51,6 @@ Component({
         selected: data.index
       });
       
-      console.log('切换到:', url);
       wx.switchTab({
         url
       });
@@ -62,12 +59,10 @@ Component({
     init() {
       const page = getCurrentPages().pop();
       const route = page ? page.route : null;
-      console.log('TabBar.init 当前页面路由:', route);
       
       if (!route) return;
       
       const index = this.data.list.findIndex(item => ('/' + route) === item.pagePath);
-      console.log('匹配的TabBar索引:', index);
       
       if (index !== -1 && index !== this.data.selected) {
         this.setData({ selected: index });
@@ -77,19 +72,16 @@ Component({
   
   lifetimes: {
     attached() {
-      console.log('TabBar组件已附加');
       this.init();
     },
     
     ready() {
-      console.log('TabBar组件已就绪');
       this.init();
     }
   },
   
   pageLifetimes: {
     show() {
-      console.log('TabBar页面显示');
       this.init();
     }
   }

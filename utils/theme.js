@@ -53,7 +53,19 @@ function setTheme(theme) {
 function getThemeColor() {
   try {
     const colorKey = wx.getStorageSync('themeColor');
-    return THEME_COLORS[colorKey] || THEME_COLORS[DEFAULT_COLOR];
+    
+    // 如果是十六进制颜色值（以#开头），直接返回
+    if (typeof colorKey === 'string' && colorKey.startsWith('#')) {
+      return colorKey;
+    }
+    
+    // 如果是预设颜色的键名，返回对应的颜色值
+    if (THEME_COLORS[colorKey]) {
+      return THEME_COLORS[colorKey];
+    }
+    
+    // 否则返回默认颜色
+    return THEME_COLORS[DEFAULT_COLOR];
   } catch (e) {
     console.error('获取主题色失败', e);
     return THEME_COLORS[DEFAULT_COLOR];

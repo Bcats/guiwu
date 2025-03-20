@@ -5,25 +5,33 @@
 
 const dateUtil = {
   /**
+   * 将日期字符串或Date对象转换为标准Date对象
+   * @param {String|Date} date 日期对象或日期字符串
+   * @returns {Date} 标准化的Date对象
+   */
+  parseDate: function(date) {
+    if (!date) return null;
+    
+    let parsedDate;
+    if (typeof date === 'string') {
+      // 修复iOS兼容性问题，将'-'替换为'/'
+      parsedDate = new Date(date.replace(/-/g, '/'));
+    } else {
+      parsedDate = date;
+    }
+    
+    return isNaN(parsedDate.getTime()) ? null : parsedDate;
+  },
+  
+  /**
    * 格式化日期
    * @param {String|Date} date 日期对象或日期字符串
    * @param {String} format 格式化模板，默认'YYYY-MM-DD'
    * @returns {String} 格式化后的日期字符串
    */
   formatDate: function(date, format = 'YYYY-MM-DD') {
-    if (!date) return '';
-    
-    let d;
-    if (typeof date === 'string') {
-      // 修复iOS兼容性问题，将'-'替换为'/'
-      d = new Date(date.replace(/-/g, '/'));
-    } else {
-      d = date;
-    }
-    
-    if (isNaN(d.getTime())) {
-      return '';
-    }
+    const d = this.parseDate(date);
+    if (!d) return '';
     
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -42,34 +50,25 @@ const dateUtil = {
   },
   
   /**
+   * 格式化日期字符串，适用于展示
+   * @param {String} dateStr 日期字符串 
+   * @returns {String} 格式化后的日期
+   */
+  formatDateString: function(dateStr) {
+    return this.formatDate(dateStr, 'YYYY年MM月DD日');
+  },
+  
+  /**
    * 计算两个日期之间的天数
    * @param {String|Date} startDate 开始日期
    * @param {String|Date} endDate 结束日期，默认为当前日期
    * @returns {Number} 天数差
    */
   daysBetween: function(startDate, endDate = new Date()) {
-    if (!startDate) return 0;
+    const start = this.parseDate(startDate);
+    const end = this.parseDate(endDate);
     
-    let start, end;
-    
-    // 处理iOS兼容性问题
-    if (typeof startDate === 'string') {
-      // 将'-'替换为'/'以兼容iOS
-      start = new Date(startDate.replace(/-/g, '/'));
-    } else {
-      start = startDate;
-    }
-    
-    if (typeof endDate === 'string') {
-      // 将'-'替换为'/'以兼容iOS
-      end = new Date(endDate.replace(/-/g, '/'));
-    } else {
-      end = endDate;
-    }
-    
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-      return 0;
-    }
+    if (!start || !end) return 0;
     
     // 转换为无时间的日期
     const startDateOnly = new Date(start.getFullYear(), start.getMonth(), start.getDate());
@@ -88,9 +87,8 @@ const dateUtil = {
    * @returns {String} 使用时间描述
    */
   getUsageDuration: function(purchaseDate) {
-    if (!purchaseDate) return '';
-    
     const days = this.daysBetween(purchaseDate);
+    if (!days) return '';
     
     // 小于一个月
     if (days < 30) {
@@ -122,23 +120,12 @@ const dateUtil = {
    * @returns {Object} 包含状态和剩余天数的对象
    */
   getWarrantyStatus: function(warrantyDate) {
-    if (!warrantyDate) {
+    const warranty = this.parseDate(warrantyDate);
+    if (!warranty) {
       return { status: 'unknown', daysLeft: 0 };
-    }
-    
-    // 处理iOS兼容性问题
-    let warranty;
-    if (typeof warrantyDate === 'string') {
-      warranty = new Date(warrantyDate.replace(/-/g, '/'));
-    } else {
-      warranty = warrantyDate;
     }
     
     const today = new Date();
-    
-    if (isNaN(warranty.getTime())) {
-      return { status: 'unknown', daysLeft: 0 };
-    }
     
     // 保修已过期
     if (warranty < today) {
@@ -168,21 +155,10 @@ const dateUtil = {
    * @returns {Number} 保修进度百分比（0-100）
    */
   calculateWarrantyProgress: function(purchaseDate, warrantyExpire) {
-    if (!purchaseDate || !warrantyExpire) return 0;
+    const start = this.parseDate(purchaseDate);
+    const end = this.parseDate(warrantyExpire);
     
-    // 处理iOS兼容性问题
-    let start, end;
-    if (typeof purchaseDate === 'string') {
-      start = new Date(purchaseDate.replace(/-/g, '/'));
-    } else {
-      start = purchaseDate;
-    }
-    
-    if (typeof warrantyExpire === 'string') {
-      end = new Date(warrantyExpire.replace(/-/g, '/'));
-    } else {
-      end = warrantyExpire;
-    }
+    if (!start || !end) return 0;
     
     const now = new Date();
     
@@ -206,19 +182,8 @@ const dateUtil = {
    * @returns {String} 相对时间描述
    */
   getRelativeTimeDesc: function(date) {
-    if (!date) return '';
-    
-    // 处理iOS兼容性问题
-    let d;
-    if (typeof date === 'string') {
-      d = new Date(date.replace(/-/g, '/'));
-    } else {
-      d = date;
-    }
-    
-    if (isNaN(d.getTime())) {
-      return '';
-    }
+    const d = this.parseDate(date);
+    if (!d) return '';
     
     const now = new Date();
     const diffDays = this.daysBetween(d, now);
@@ -244,19 +209,8 @@ const dateUtil = {
    * @returns {String} 使用时间描述，如"3年2个月"
    */
   getUsagePeriod: function(date) {
-    if (!date) return '';
-    
-    // 处理iOS兼容性问题
-    let d;
-    if (typeof date === 'string') {
-      d = new Date(date.replace(/-/g, '/'));
-    } else {
-      d = date;
-    }
-    
-    if (isNaN(d.getTime())) {
-      return '';
-    }
+    const d = this.parseDate(date);
+    if (!d) return '';
     
     const now = new Date();
     const diffDays = this.daysBetween(d, now);
