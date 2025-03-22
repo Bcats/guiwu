@@ -26,9 +26,14 @@
     <!-- 我的资产概览 -->
     <view class="overview-card">
       <view class="overview-title">
-        我的资产
+        <text>我的资产</text>
         <view class="dropdown" bindtap="toggleCategoryDropdown">
           {{selectedCategory}} <text class="fa fa-chevron-down dropdown-icon"></text>
+        </view>
+        <view class="cost-mode-switch" bindtap="toggleCostMode" style="margin-left: auto;">
+          <text class="cost-mode-text {{costMode === 'daily' ? 'active' : ''}}">日均</text>
+          <text class="cost-mode-separator">/</text>
+          <text class="cost-mode-text {{costMode === 'usage' ? 'active' : ''}}">次均</text>
         </view>
       </view>
       <view class="overview-row">
@@ -37,8 +42,8 @@
           <view class="overview-value">¥{{totalValue}}</view>
         </view>
         <view class="overview-item">
-          <view class="overview-label">日均成本</view>
-          <view class="overview-value">¥{{dailyAverage}}</view>
+          <view class="overview-label">{{costMode === 'daily' ? '日均成本' : '次均成本'}}</view>
+          <view class="overview-value">¥{{currentAverage}}</view>
         </view>
       </view>
     </view>
@@ -88,7 +93,7 @@
             </view>
             <view class="asset-price">
               <text>¥{{item.price}} · {{item.usageDays}}天 · {{item.usageCount}}次</text>
-              <text style="margin-left: auto; color: #2c7ef8; font-size: 30rpx;">¥{{item.dailyCost}}/天</text>
+              <text style="margin-left: auto; color: #2c7ef8; font-size: 30rpx;">¥{{costMode === 'daily' ? item.dailyCost : item.usageCost}}/{{costMode === 'daily' ? '天' : '次'}}</text>
             </view>
           </view>
           
@@ -113,6 +118,7 @@
         </view>
 
       </view>
+
     </block>
 
     <!-- 空状态 -->
@@ -176,6 +182,10 @@
             <view class="detail-info-card">
               <view class="info-card-label">日均成本</view>
               <view class="info-card-value">¥{{detailAsset.dailyCost}}<text class="info-unit">/天</text></view>
+            </view>
+            <view class="detail-info-card">
+              <view class="info-card-label">次均成本</view>
+              <view class="info-card-value">¥{{detailAsset.usageCost}}<text class="info-unit">/次</text></view>
             </view>
             <view class="detail-info-card">
               <view class="info-card-label">当前状态</view>

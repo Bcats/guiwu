@@ -18,6 +18,9 @@ const statisticsUtil = {
     
     // 计算日均成本 - 每个资产的单独日均成本之和
     let dailyAverage = 0;
+    // 计算次均成本 - 每个资产的单独次均成本之和
+    let usageAverage = 0;
+    
     assets.forEach(asset => {
       // 计算每个资产的使用天数
       const usageDays = dateUtil.daysBetween(asset.purchaseDate);
@@ -28,16 +31,27 @@ const statisticsUtil = {
       const assetDailyCost = (Number(asset.price) || 0) / effectiveUsageDays;
       // 累加所有资产的日均成本
       dailyAverage += assetDailyCost;
+      
+      // 计算每个资产的次均成本
+      const usageCount = parseInt(asset.usageCount || 1);
+      // 确保使用次数至少为1次，避免除以0的错误
+      const effectiveUsageCount = Math.max(1, usageCount);
+      // 计算每个资产的次均成本
+      const assetUsageCost = (Number(asset.price) || 0) / effectiveUsageCount;
+      // 累加所有资产的次均成本
+      usageAverage += assetUsageCost;
     });
     
     // 保留两位小数
     dailyAverage = Number(dailyAverage.toFixed(2));
+    usageAverage = Number(usageAverage.toFixed(2));
     
     return {
       totalValue,
       assetCount: assetCount,
       totalCount: assetCount, // 添加totalCount属性以匹配index.js中的引用
-      dailyAverage
+      dailyAverage,
+      usageAverage
     };
   },
   

@@ -14,6 +14,12 @@ Page({
     totalValue: 0,
     // 日均成本
     dailyAverage: 0,
+    // 次均成本
+    usageAverage: 0,
+    // 成本显示模式: 'daily'(日均) 或 'usage'(次均)
+    costMode: 'daily', 
+    // 当前显示的成本值
+    currentAverage: 0,
     // 分类列表
     categories: [],
     // 当前选中的分类
@@ -142,7 +148,7 @@ Page({
       console.log('获取到资产数量:', assets.length);
       
       // 获取概览数据
-      const overview = statisticsUtil.getOverview() || { totalCount: 0, totalValue: 0, dailyAverage: 0 };
+      const overview = statisticsUtil.getOverview() || { totalCount: 0, totalValue: 0, dailyAverage: 0, usageAverage: 0 };
       
       // 获取并处理所有分类
       const categories = assetManager.getCategories() || [];
@@ -158,6 +164,8 @@ Page({
           totalAssets: 0,
           totalValue: 0,
           dailyAverage: 0,
+          usageAverage: 0,
+          currentAverage: 0,
           loading: false
         });
         return;
@@ -168,8 +176,11 @@ Page({
         // 计算使用天数
         const usageDays = this.calculateUsageDays(asset);
         
-        // 计算使用成本
+        // 计算日均成本
         const dailyCost = this.calculateDailyCost(asset, usageDays);
+        
+        // 计算次均成本
+        const usageCost = this.calculateUsageCost(asset);
         
         // 格式化日期
         const formattedPurchaseDate = asset.purchaseDate 
@@ -186,6 +197,7 @@ Page({
           ...asset,
           usageDays: usageDays,
           dailyCost: dailyCost,
+          usageCost: usageCost,
           formattedPurchaseDate: formattedPurchaseDate,
           usageRate: usageRate,
           categoryLower: categoryLower,
@@ -196,6 +208,11 @@ Page({
       // 所有分类加上"全部"选项
       const allCategories = ['全部', ...categories];
       
+      // 根据当前模式计算要显示的成本
+      const currentAverage = this.data.costMode === 'daily' ? 
+        overview.dailyAverage.toFixed(2) : 
+        overview.usageAverage.toFixed(2);
+      
       this.setData({
         assets: formattedAssets,
         filteredAssets: formattedAssets,
@@ -204,6 +221,8 @@ Page({
         totalAssets: formattedAssets.length,
         totalValue: overview.totalValue.toFixed(2),
         dailyAverage: overview.dailyAverage.toFixed(2),
+        usageAverage: overview.usageAverage.toFixed(2),
+        currentAverage: currentAverage,
         loading: false
       });
       
@@ -556,6 +575,13 @@ Page({
         }
       }
       
+      // 计算次均成本
+      let usageCost = 0;
+      if (asset.price) {
+        const usageCount = parseInt(asset.usageCount || 1);
+        usageCost = (asset.price / Math.max(1, usageCount)).toFixed(2);
+      }
+      
       this.setData({
         detailAsset: {
           ...asset,
@@ -563,7 +589,8 @@ Page({
           iconColor,
           isExpired,
           usageDays: usageDays || 0,
-          dailyCost: dailyCost || 0
+          dailyCost: dailyCost || 0,
+          usageCost: usageCost || 0
         },
         showDetailPopup: true
       });
@@ -800,5 +827,30 @@ Page({
         iconAnimating: false
       });
     }, 300);
+  },
+  
+  // 切换成本显示模式（日均/次均）
+  toggleCostMode: function() {
+    // 切换模式
+    const newMode = this.data.costMode === 'daily' ? 'usage' : 'daily';
+    // 计算要显示的值
+    const currentAverage = newMode === 'daily' ? 
+      this.data.dailyAverage : 
+      this.data.usageAverage;
+    
+    // 更新状态
+    this.setData({
+      costMode: newMode,
+      currentAverage: currentAverage
+    });
+  },
+  
+  // 计算每次使用成本
+  calculateUsageCost: function(asset) {
+    if (!asset.price) return 0;
+    
+    const price = parseFloat(asset.price);
+    const usageCount = parseInt(asset.usageCount || 1);
+    return (price / Math.max(1, usageCount)).toFixed(2);
   },
 }); 

@@ -75,7 +75,7 @@
 }
 
 .overview-item {
-  margin-bottom: 20rpx;
+  /* margin-bottom: 20rpx; */
 }
 
 .overview-label {
@@ -563,8 +563,8 @@
 /* 分类下拉菜单 */
 .category-dropdown {
   position: absolute;
-  top: 100rpx;
-  left: 200rpx;
+  top: 130rpx;
+  left: 230rpx;
   background-color: white;
   border-radius: 16rpx;
   box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.1);
@@ -1049,4 +1049,42 @@
   color: #333;
   flex: 1;
   text-align: center;
+}
+
+.overview-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20rpx;
+}
+
+.cost-mode-switch {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 40rpx;
+  padding: 6rpx 16rpx;
+  display: flex;
+  align-items: center;
+  font-size: 24rpx;
+}
+
+.cost-mode-text {
+  padding: 4rpx 10rpx;
+  border-radius: 20rpx;
+  transition: all 0.3s;
+}
+
+.cost-mode-text.active {
+  background-color: rgba(255, 255, 255, 0.25);
+  font-weight: bold;
+}
+
+.cost-mode-separator {
+  margin: 0 4rpx;
+  opacity: 0.8;
 } 
+
+.hint-text{
+  margin-top: 30rpx;
+  text-align: center;
+  font-size: 24rpx;
+  color: var(--color-text-light);
+}
