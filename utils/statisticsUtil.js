@@ -23,6 +23,7 @@ const statisticsUtil = {
       const usageDays = dateUtil.daysBetween(asset.purchaseDate);
       // 确保使用天数至少为1天，避免除以0的错误
       const effectiveUsageDays = Math.max(1, usageDays);
+      console.log(effectiveUsageDays);
       // 计算每个资产的日均成本
       const assetDailyCost = (Number(asset.price) || 0) / effectiveUsageDays;
       // 累加所有资产的日均成本

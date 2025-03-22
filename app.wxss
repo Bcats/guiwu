@@ -1,6 +1,5 @@
 /**app.wxss**/
 @import "/static/fontawesome.wxss";
-
 /* 亮色主题变量 */
 page {
   --color-primary: #2C7EF8;

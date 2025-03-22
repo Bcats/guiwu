@@ -1,5 +1,5 @@
 /**
- * 归物小程序图标库 - 基于FontAwesome精简版
+ * 归物盒子小程序图标库 - 基于FontAwesome精简版
  */
 
 @font-face {
@@ -50,6 +50,11 @@
 /* 日均图标 */
 .fa-calendar-alt:before {
   content: "\f073";
+}
+
+/* 日期图标 */
+.fa-calendar:before {
+  content: "\f133";
 }
 
 /* 状态图标 */
@@ -121,6 +126,21 @@
   content: "\f2ed";
 }
 
+/* 分享图标 */
+.fa-share-alt:before {
+  content: "\f1e0";
+}
+
+/* 退出登录图标 */
+.fa-sign-out-alt:before {
+  content: "\f2f5";
+}
+
+/* 警告图标 */
+.fa-exclamation-triangle:before {
+  content: "\f071";
+}
+
 /* 主题图标 */
 .fa-palette:before {
   content: "\f53f";
@@ -132,7 +152,6 @@
 .fa-times:before { content: "\f00d"; }
 .fa-search:before { content: "\f002"; }
 .fa-exclamation-circle:before { content: "\f06a"; }
-.fa-exclamation-triangle:before { content: "\f071"; }
 .fa-question-circle:before { content: "\f059"; }
 .fa-tags:before { content: "\f02c"; }
 .fa-chart-line:before { content: "\f201"; }
@@ -169,4 +188,213 @@
 .fa-briefcase:before { content: "\f0b1"; }
 .fa-baby:before { content: "\f77c"; }
 .fa-utensils:before { content: "\f2e7"; }
-.fa-tools:before { content: "\f7d9"; } 
+.fa-tools:before { content: "\f7d9"; }
+
+/* 添加缺失的图标 */
+.fa-keyboard:before { content: "\f11c"; }
+.fa-mouse:before { content: "\f8cc"; }
+.fa-table:before { content: "\f0ce"; }
+.fa-bath:before { content: "\f2cd"; }
+.fa-lightbulb:before { content: "\f0eb"; }
+.fa-motorcycle:before { content: "\f21c"; }
+.fa-subway:before { content: "\f239"; }
+.fa-bus:before { content: "\f207"; }
+.fa-plane:before { content: "\f072"; }
+.fa-film:before { content: "\f008"; }
+.fa-music:before { content: "\f001"; }
+.fa-dumbbell:before { content: "\f44b"; }
+.fa-shoe-prints:before { content: "\f54b"; }
+.fa-hat-cowboy:before { content: "\f8c0"; }
+.fa-glasses:before { content: "\f530"; }
+.fa-socks:before { content: "\f696"; }
+.fa-gift:before { content: "\f06b"; }
+
+/* 新增更多电子产品图标 */
+.fa-tablet-alt:before { content: "\f3fa"; }
+.fa-phone:before { content: "\f095"; }
+.fa-calculator:before { content: "\f1ec"; }
+.fa-microchip:before { content: "\f2db"; }
+.fa-memory:before { content: "\f538"; }
+.fa-server:before { content: "\f233"; }
+.fa-print:before { content: "\f02f"; }
+.fa-scanner:before { content: "\f488"; }
+.fa-router:before { content: "\f8da"; }
+.fa-usb:before { content: "\f287"; }
+.fa-sd-card:before { content: "\f7c2"; }
+.fa-sim-card:before { content: "\f7c4"; }
+.fa-charging-station:before { content: "\f5e7"; }
+.fa-solar-panel:before { content: "\f5ba"; }
+
+/* 新增更多家具家居图标 */
+.fa-couch:before { content: "\f4b8"; }
+.fa-toilet:before { content: "\f7d8"; }
+.fa-shower:before { content: "\f2cc"; }
+.fa-sink:before { content: "\e06d"; }
+.fa-door-open:before { content: "\f52b"; }
+.fa-door-closed:before { content: "\f52a"; }
+.fa-window:before { content: "\f40e"; }
+.fa-fan:before { content: "\f863"; }
+.fa-archive:before { content: "\f187"; }
+.fa-box:before { content: "\f466"; }
+.fa-lamp:before { content: "\f4ca"; }
+.fa-air-conditioner:before { content: "\f8f4"; }
+.fa-hot-tub:before { content: "\f593"; }
+
+/* 新增更多交通工具图标 */
+.fa-truck:before { content: "\f0d1"; }
+.fa-ship:before { content: "\f21a"; }
+.fa-helicopter:before { content: "\f533"; }
+.fa-train:before { content: "\f238"; }
+.fa-tram:before { content: "\f7da"; }
+.fa-taxi:before { content: "\f1ba"; }
+.fa-ambulance:before { content: "\f0f9"; }
+.fa-rocket:before { content: "\f135"; }
+.fa-shuttle-van:before { content: "\f5b6"; }
+.fa-trailer:before { content: "\e041"; }
+.fa-snowmobile:before { content: "\f7d1"; }
+.fa-sleigh:before { content: "\f7cc"; }
+
+/* 新增更多娱乐图标 */
+.fa-dice:before { content: "\f522"; }
+.fa-chess:before { content: "\f439"; }
+.fa-puzzle-piece:before { content: "\f12e"; }
+.fa-guitar:before { content: "\f7a6"; }
+.fa-drum:before { content: "\f569"; }
+.fa-microphone:before { content: "\f130"; }
+.fa-headset:before { content: "\f590"; }
+.fa-ticket-alt:before { content: "\f3ff"; }
+.fa-bowling-ball:before { content: "\f436"; }
+.fa-baseball-ball:before { content: "\f433"; }
+.fa-football-ball:before { content: "\f44e"; }
+.fa-futbol:before { content: "\f1e3"; }
+.fa-basketball-ball:before { content: "\f434"; }
+.fa-tennis-ball:before { content: "\f45e"; }
+.fa-golf-ball:before { content: "\f450"; }
+
+/* 新增更多服饰图标 */
+.fa-vest:before { content: "\e085"; }
+.fa-vest-patches:before { content: "\e086"; }
+.fa-hat-wizard:before { content: "\f6e8"; }
+.fa-hat-cowboy-side:before { content: "\f8c1"; }
+.fa-mitten:before { content: "\f7b5"; }
+.fa-boot:before { content: "\f782"; }
+.fa-crown:before { content: "\f521"; }
+.fa-ring:before { content: "\f70b"; }
+.fa-scarf:before { content: "\f7c1"; }
+.fa-user-tie:before { content: "\f508"; }
+.fa-graduation-cap:before { content: "\f19d"; }
+
+/* 新增更多工具图标 */
+.fa-hammer:before { content: "\f6e3"; }
+.fa-screwdriver:before { content: "\f54a"; }
+.fa-wrench:before { content: "\f0ad"; }
+.fa-toolbox:before { content: "\f552"; }
+.fa-ruler:before { content: "\f545"; }
+.fa-ruler-combined:before { content: "\f546"; }
+.fa-tape:before { content: "\f4db"; }
+.fa-scissors:before { content: "\f0c4"; }
+.fa-paint-roller:before { content: "\f5aa"; }
+.fa-brush:before { content: "\f55d"; }
+.fa-pencil-ruler:before { content: "\f5ae"; }
+.fa-pencil-alt:before { content: "\f303"; }
+.fa-compass:before { content: "\f14e"; }
+
+/* 新增更多其他图标 */
+.fa-umbrella:before { content: "\f0e9"; }
+.fa-shopping-cart:before { content: "\f07a"; }
+.fa-shopping-bag:before { content: "\f290"; }
+.fa-medal:before { content: "\f5a2"; }
+.fa-trophy:before { content: "\f091"; }
+.fa-id-card:before { content: "\f2c2"; }
+.fa-passport:before { content: "\f5ab"; }
+.fa-key:before { content: "\f084"; }
+.fa-lock:before { content: "\f023"; }
+.fa-wallet:before { content: "\f555"; }
+.fa-piggy-bank:before { content: "\f4d3"; }
+.fa-money-bill:before { content: "\f0d6"; }
+.fa-coins:before { content: "\f51e"; }
+.fa-credit-card:before { content: "\f09d"; }
+.fa-donate:before { content: "\f4b9"; }
+
+/* 新增厨房图标 */
+.fa-blender:before { content: "\f517"; }
+.fa-coffee:before { content: "\f0f4"; }
+.fa-mug-hot:before { content: "\f7b6"; }
+.fa-wine-glass:before { content: "\f4e3"; }
+.fa-wine-bottle:before { content: "\f72f"; }
+.fa-glass-martini:before { content: "\f000"; }
+.fa-pizza-slice:before { content: "\f818"; }
+.fa-hamburger:before { content: "\f805"; }
+.fa-ice-cream:before { content: "\f810"; }
+.fa-cookie:before { content: "\f563"; }
+.fa-egg:before { content: "\f7fb"; }
+.fa-pepper-hot:before { content: "\f816"; }
+.fa-bread-slice:before { content: "\f7ec"; }
+.fa-cheese:before { content: "\f7ef"; }
+.fa-drumstick-bite:before { content: "\f6d7"; }
+
+/* 新增设备图标 */
+.fa-watch:before { content: "\f017"; }
+.fa-laptop-code:before { content: "\f5fc"; }
+.fa-microscope:before { content: "\f610"; }
+.fa-satellite-dish:before { content: "\f7c0"; }
+.fa-telescope:before { content: "\e03e"; }
+.fa-thermometer:before { content: "\f491"; }
+.fa-drone:before { content: "\f85f"; }
+.fa-projector:before { content: "\f8d6"; }
+.fa-lamp-desk:before { content: "\e014"; }
+.fa-robot:before { content: "\f544"; }
+.fa-plug:before { content: "\f1e6"; }
+.fa-battery-full:before { content: "\f240"; }
+.fa-speaker:before { content: "\f8df"; }
+.fa-record-vinyl:before { content: "\f8d9"; }
+.fa-compact-disc:before { content: "\f51f"; }
+
+/* 修复一些图标的定义 */
+
+/* fa-watch 修正 */
+.fa-watch:before { content: "\f017"; }
+
+/* fa-blender-phone 修正 */
+.fa-blender-phone:before { content: "\f6b6"; }
+
+/* fa-carrot 修正 */
+.fa-carrot:before { content: "\f787"; }
+
+/* fa-table-tennis 修正 */
+.fa-table-tennis:before { content: "\f45d"; }
+
+/* fa-mask 修正 */
+.fa-mask:before { content: "\f6fa"; }
+
+/* fa-tractor 修正 */
+.fa-tractor:before { content: "\f722"; }
+
+/* 补充可能缺少的图标 */
+.fa-heart:before { content: "\f004"; }
+.fa-paint-brush:before { content: "\f1fc"; }
+.fa-pen:before { content: "\f304"; }
+
+/* 某些FontAwesome 5特殊图标的修正 */
+.fa-sink:before { content: "\e06d"; }
+.fa-vest:before { content: "\e085"; }
+.fa-lamp-desk:before { content: "\e014"; }
+.fa-trailer:before { content: "\e041"; }
+.fa-telescope:before { content: "\e03e"; }
+.fa-projector:before { content: "\f8d6"; }
+.fa-speaker:before { content: "\f8df"; }
+.fa-air-conditioner:before { content: "\f8f4"; }
+.fa-snowmobile:before { content: "\f7d1"; }
+.fa-drone:before { content: "\f85f"; }
+
+/* 添加一些通用图标的备用显示 */
+.fa-mobile-alt:before, .fa-mobile:before { content: "\f3cd"; }
+.fa-laptop-code:before, .fa-code-laptop:before { content: "\f5fc"; }
+.fa-user-tie:before { content: "\f508"; }
+.fa-mug-hot:before { content: "\f7b6"; }
+.fa-wine-glass:before { content: "\f4e3"; }
+.fa-hamburger:before { content: "\f805"; }
+.fa-ice-cream:before { content: "\f810"; }
+.fa-cookie:before { content: "\f563"; }
+.fa-pepper-hot:before { content: "\f816"; }
+.fa-pizza-slice:before { content: "\f818"; } 

@@ -2,7 +2,6 @@
   "pages": [
     "pages/index/index",
     "pages/add/add",
-    "pages/detail/detail",
     "pages/statistics/statistics",
     "pages/personal/personal",
     "pages/theme/theme",
@@ -12,7 +11,7 @@
   "window": {
     "backgroundTextStyle": "dark",
     "navigationBarBackgroundColor": "#2C7EF8",
-    "navigationBarTitleText": "归物",
+    "navigationBarTitleText": "归物盒子",
     "navigationBarTextStyle": "white",
     "enablePullDownRefresh": true
   },

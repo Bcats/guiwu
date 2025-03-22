@@ -78,11 +78,11 @@
     </view>
     
     <!-- 资产排行 -->
-    <view class="card">
-      <view class="card-header">资产排行</view>
+    <!-- <view class="card">
+      <view class="card-header">资产排行</view> -->
       
       <!-- 最常使用 -->
-      <view class="ranking-section" wx:if="{{mostUsedAssets.length > 0}}">
+      <!-- <view class="ranking-section" wx:if="{{mostUsedAssets.length > 0}}">
         <view class="ranking-title">
           <text class="fa fa-star ranking-icon" style="color: #FFD166;"></text>最常使用
         </view>
@@ -90,16 +90,16 @@
           <view>{{index + 1}}. {{item.name}}</view>
           <view>{{item.usageCount}}次</view>
         </view>
-      </view>
+      </view> -->
       
       <!-- 无数据提示 -->
-      <view class="empty-state-mini" wx:if="{{mostUsedAssets.length === 0}}">
+      <!-- <view class="empty-state-mini" wx:if="{{mostUsedAssets.length === 0}}">
         <text class="empty-state-text">暂无使用数据</text>
       </view>
-    </view>
+    </view> -->
     
     <!-- 最近添加 -->
-    <view class="card">
+    <!-- <view class="card">
       <view class="card-header">最近添加</view>
       
       <view wx:if="{{recentlyAddedAssets.length > 0}}">
@@ -113,13 +113,14 @@
             <text class="recent-asset-time">{{item.relativeTime}}</text>
           </view>
         </view>
-      </view>
+      </view> -->
       
       <!-- 无数据提示 -->
-      <view class="empty-state-mini" wx:else>
+      <!-- <view class="empty-state-mini" wx:else>
         <text class="empty-state-text">暂无资产数据</text>
       </view>
-    </view>
+    </view> -->
+    
   </view>
   
   <!-- 使用自定义tabBar组件 -->

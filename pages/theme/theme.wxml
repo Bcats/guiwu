@@ -35,7 +35,7 @@
     <view class="settings-title">效果预览</view>
     <view class="preview-card">
       <view class="preview-header" style="background-color: {{themeColor}};">
-        <text class="preview-title">归物</text>
+        <text class="preview-title">归物盒子</text>
       </view>
       <view class="preview-content">
         <view class="preview-item"></view>

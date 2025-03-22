@@ -4,9 +4,9 @@ const { getTheme } = require('../../utils/theme');
 Page({
   data: {
     theme: 'light',
-    version: '1.0.0',
-    updateTime: '2023-07-15',
-    contactEmail: 'support@guiwu.com'
+    version: '1.0.1',
+    updateTime: '2025-03-20',
+    contactEmail: 'MYbcats@163.com'
   },
 
   onLoad: function (options) {

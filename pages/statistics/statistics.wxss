@@ -11,7 +11,7 @@
 .stats-scroll-view {
   flex: 1;
   background-color: #f7f8fa;
-  padding: 20rpx;
+  padding-bottom: 60rpx;
   overflow-y: auto; /* 允许内容滚动 */
 }
 
@@ -142,6 +142,7 @@
 
 /* 最近添加 */
 .recent-asset-info {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -149,7 +150,7 @@
 
 .recent-asset-icon {
   color: var(--color-primary);
-  margin-right: 8rpx;
+  margin-right: 16rpx;
 }
 
 .recent-asset-meta {
@@ -159,7 +160,7 @@
 }
 
 .recent-asset-price {
-  margin-left: 20rpx;
+  margin-left: auto;
   font-size: 28rpx;
   font-weight: 500;
   color: var(--color-text);

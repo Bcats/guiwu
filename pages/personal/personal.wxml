@@ -25,31 +25,21 @@
   <block wx:if="{{!loading}}">
     <!-- 用户卡片 -->
     <view class="user-card">
-      <image class="user-avatar" src="{{userInfo.avatarUrl}}"></image>
+      <view class="avatar-container" bindtap="getUserProfile">
+        <image class="user-avatar" src="{{userInfo.avatarUrl}}"></image>
+        <view class="avatar-tip" wx:if="{{!isLoggedIn}}">点击登录</view>
+      </view>
       <view class="user-info">
         <view class="user-nickname">{{userInfo.nickName}}</view>
-        <view class="user-id">ID: {{userInfo.userId}}</view>
-      </view>
-    </view>
-    
-    <!-- 资产统计卡片 -->
-    <view class="stats-card">
-      <view class="stats-item">
-        <view class="stats-value">{{assetStats.count}}</view>
-        <view class="stats-label">资产总数</view>
-      </view>
-      <view class="stats-divider"></view>
-      <view class="stats-item">
-        <view class="stats-value">¥{{assetStats.totalValue}}</view>
-        <view class="stats-label">资产总值</view>
+        <view class="user-id" wx:if="{{userInfo.userId}}">ID: {{userInfo.userId}}</view>
       </view>
     </view>
     
     <!-- 功能列表 -->
     <view class="function-list">
       <!-- 主题设置 -->
-      <view class="function-item" bindtap="goToTheme">
-        <view class="function-icon theme-icon">
+      <!-- <view class="function-item" bindtap="goToTheme">
+        <view class="function-icon icon-theme">
           <text class="fa fa-palette"></text>
         </view>
         <view class="function-info">
@@ -57,51 +47,107 @@
           <view class="function-desc">自定义应用主题和颜色</view>
         </view>
         <text class="fa fa-chevron-right function-arrow"></text>
-      </view>
-      
-      <!-- 关于应用 -->
-      <view class="function-item" bindtap="goToAbout">
-        <view class="function-icon about-icon">
-          <text class="fa fa-info-circle"></text>
-        </view>
-        <view class="function-info">
-          <view class="function-title">关于归物</view>
-          <view class="function-desc">了解应用的更多信息</view>
-        </view>
-        <text class="fa fa-chevron-right function-arrow"></text>
-      </view>
+      </view> -->
       
       <!-- 分享小程序 -->
-      <view class="function-item" bindtap="onShareAppMessage">
-        <view class="function-icon share-icon">
-          <image class="menu-icon" src="/static/images/share.png" mode="aspectFit"></image>
+      <button class="share-button function-item" open-type="share">
+        <view class="function-icon icon-share">
+          <text class="fa fa-share-alt"></text>
         </view>
         <view class="function-info">
           <view class="function-title">分享小程序</view>
           <view class="function-desc">分享给好友或朋友圈</view>
         </view>
         <text class="fa fa-chevron-right function-arrow"></text>
-      </view>
-      
+      </button>
+
+      <!-- 给个好评 -->
+      <button class="share-button function-item" open-type="review">
+        <view class="function-icon icon-review">
+          <text class="fa fa-star"></text>
+        </view>
+        <view class="function-info">
+          <view class="function-title">给个好评</view>
+          <view class="function-desc">喜欢的话请给我们打个五星吧</view>
+        </view>
+        <text class="fa fa-chevron-right function-arrow"></text>
+      </button>
+
       <!-- 意见反馈 -->
-      <view class="function-item" bindtap="onFeedback">
-        <view class="function-icon feedback-icon">
-          <image class="menu-icon" src="/static/images/feedback.png" mode="aspectFit"></image>
+      <button class="share-button function-item" open-type="feedback">
+        <view class="function-icon icon-feedback">
+          <text class="fa fa-envelope"></text>
         </view>
         <view class="function-info">
           <view class="function-title">意见反馈</view>
-          <view class="function-desc">帮助我们改进应用</view>
+          <view class="function-desc">提交问题或建议给开发者</view>
+        </view>
+        <text class="fa fa-chevron-right function-arrow"></text>
+      </button>
+
+      <!-- 清除数据-->
+      <view class="function-item" bindtap="showClearDataConfirm">
+        <view class="function-icon icon-clear">
+          <text class="fa fa-trash-alt"></text>
+        </view>
+        <view class="function-info">
+          <view class="function-title">清除数据</view>
+          <view class="function-desc">清除所有本地存储的资产数据</view>
         </view>
         <text class="fa fa-chevron-right function-arrow"></text>
       </view>
+
+      <!-- 关于应用 -->
+      <view class="function-item" bindtap="goToAbout">
+        <view class="function-icon icon-about">
+          <text class="fa fa-info-circle"></text>
+        </view>
+        <view class="function-info">
+          <view class="function-title">关于归物盒子</view>
+          <view class="function-desc">了解应用的更多信息</view>
+        </view>
+        <text class="fa fa-chevron-right function-arrow"></text>
+      </view>
+
+      <!-- 退出登录 (仅在已登录时显示) -->
+      <view class="function-item" bindtap="userLogout" wx:if="{{isLoggedIn}}">
+        <view class="function-icon icon-logout">
+          <text class="fa fa-sign-out-alt"></text>
+        </view>
+        <view class="function-info">
+          <view class="function-title">退出登录</view>
+          <view class="function-desc">退出当前账号登录状态</view>
+        </view>
+        <text class="fa fa-chevron-right function-arrow"></text>
+      </view>
+
     </view>
-    
+
     <!-- 版本信息 -->
     <view class="version-info">
-      <view class="version-text">归物 v1.0.0</view>
-      <view class="copyright-text">© 2023 归物应用</view>
+      <view class="version-text">归物盒子 v1.0.1</view>
+      <view class="copyright-text">© 2025 归物盒子应用</view>
     </view>
   </block>
+  
+  <!-- 确认清除数据弹窗 -->
+  <view class="modal-mask" wx:if="{{showClearConfirm}}" bindtap="hideClearDataConfirm">
+    <view class="modal-container">
+      <view class="modal-content" catchtap="preventTap">
+        <view class="modal-icon">
+          <text class="fa fa-exclamation-triangle"></text>
+        </view>
+        <view class="modal-title">确认清除数据</view>
+        <view class="modal-desc">
+          此操作将删除您所有的资产记录数据，且无法恢复，确定要继续吗？
+        </view>
+        <view class="modal-buttons">
+          <view class="modal-btn cancel" bindtap="hideClearDataConfirm">取消</view>
+          <view class="modal-btn confirm" bindtap="clearAllData">确定</view>
+        </view>
+      </view>
+    </view>
+  </view>
   
   <!-- 使用自定义tabBar组件 -->
   <tab-bar selected="2"></tab-bar>

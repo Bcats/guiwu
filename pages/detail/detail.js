@@ -51,11 +51,6 @@ Page({
           asset: processedAsset,
           loading: false
         });
-        
-        // 设置页面标题
-        wx.setNavigationBarTitle({
-          title: processedAsset.name
-        });
       } else {
         this.setData({
           loading: false
@@ -83,6 +78,24 @@ Page({
     wx.navigateBack();
   },
   
+  // 计算使用天数
+  calculateUsageDays: function(asset) {
+    if (!asset.purchaseDate) return 0;
+    
+    const purchaseDate = new Date(asset.purchaseDate);
+    const today = new Date();
+    const diffTime = Math.abs(today - purchaseDate);
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+  },
+  
+  // 计算每日成本
+  calculateDailyCost: function(asset, usageDays) {
+    if (!asset.price || !usageDays) return 0;
+    
+    const price = parseFloat(asset.price);
+    return (price / usageDays).toFixed(2);
+  },
+  
   // 加载资产详情
   loadAssetDetail: function(id) {
     this.setData({ loading: true });
@@ -104,17 +117,15 @@ Page({
       // 更新资产使用次数
       assetManager.updateUsageCount(id);
       
-      // 计算使用天数
-      const usageDays = dateUtil.daysBetween(asset.purchaseDate);
+      // 计算使用天数和日均成本
+      const usageDays = this.calculateUsageDays(asset);
+      const dailyCost = this.calculateDailyCost(asset, usageDays);
       
       // 格式化使用时间描述
       const usagePeriod = dateUtil.getUsagePeriod(asset.purchaseDate);
       
       // 计算保修状态
       const warranty = dateUtil.getWarrantyStatus(asset.warrantyDate);
-      
-      // 计算日均成本
-      const dailyCost = usageDays > 0 ? (Number(asset.price) / usageDays).toFixed(2) : 0;
       
       // 更新数据
       this.setData({

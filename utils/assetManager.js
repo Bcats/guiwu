@@ -21,7 +21,7 @@ const assetManager = {
     try {
       console.log('assetManager.getAllAssets() 被调用');
       const assets = wx.getStorageSync('assets') || [];
-      console.log('从存储获取到', assets.length, '个资产');
+      console.log('从存储获取到', assets.length, '个资产', assets);
       return assets;
     } catch (e) {
       console.error('获取资产数据失败:', e);
@@ -52,6 +52,9 @@ const assetManager = {
   addAsset: function(asset) {
     try {
       console.log('保存资产:', asset);
+      // 确保使用次数是数字类型
+      asset.usageCount = parseInt(asset.usageCount || 0);
+      
       const assets = this.getAllAssets();
       const index = assets.findIndex(item => item.id === asset.id);
       
@@ -71,7 +74,7 @@ const assetManager = {
       }
       
       wx.setStorageSync('assets', assets);
-      console.log('资产保存成功');
+      console.log('资产保存成功，使用次数:', asset.usageCount);
       return true;
     } catch (e) {
       console.error('保存资产失败:', e);
@@ -89,13 +92,15 @@ const assetManager = {
       const assets = this.getAllAssets();
       const index = assets.findIndex(item => item.id === asset.id);
       if (index !== -1) {
-        // 保留原有的创建时间和使用次数
+        // 只保留原有的创建时间
         asset.createTime = assets[index].createTime;
-        asset.usageCount = assets[index].usageCount;
+        // 确保使用次数是数字类型
+        asset.usageCount = parseInt(asset.usageCount || 0);
         // 更新修改时间
         asset.updateTime = new Date().toISOString();
         assets[index] = asset;
         wx.setStorageSync('assets', assets);
+        console.log('资产更新成功，使用次数:', asset.usageCount);
         return true;
       }
       return false;

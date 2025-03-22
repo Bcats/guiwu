@@ -46,7 +46,12 @@ Page({
       '书籍': { bgColor: '#F0F5FF', borderColor: '#2F54EB', icon: 'book' },
       '摄影器材': { bgColor: '#FFE8E8', borderColor: '#FF4D4F', icon: 'camera' },
       '未分类': { bgColor: '#F5F5F5', borderColor: '#999999', icon: 'cube' }
-    }
+    },
+    
+    // 资产详情弹出层
+    showDetailPopup: false,
+    detailAsset: null,
+    iconAnimating: false
   },
 
   onLoad: function () {
@@ -77,10 +82,17 @@ Page({
   },
   
   onShow: function() {
-    console.log('页面显示 - onShow');
+    console.log('首页显示 - onShow');
     
+    // 检查全局刷新标记
+    if (app.globalData && app.globalData.needRefresh) {
+      console.log('检测到全局刷新标记，正在重新加载资产...');
+      this.loadAssets();
+      app.globalData.needRefresh = false;
+    }
     // 如果标记为需要刷新，则重新加载资产
-    if (this.data.refreshOnAdd) {
+    else if (this.data.refreshOnAdd) {
+      console.log('检测到需要刷新标记，正在重新加载资产...');
       this.loadAssets();
       this.setData({ refreshOnAdd: false });
     }
@@ -167,12 +179,16 @@ Page({
         // 计算使用率
         const usageRate = this.calculateUsageRate(asset);
         
+        // 处理分类小写
+        const categoryLower = asset.category ? asset.category.toLowerCase() : 'default';
+        
         return {
           ...asset,
           usageDays: usageDays,
           dailyCost: dailyCost,
           formattedPurchaseDate: formattedPurchaseDate,
           usageRate: usageRate,
+          categoryLower: categoryLower,
           expanded: false // 默认不展开
         };
       });
@@ -349,6 +365,7 @@ Page({
     this.touchStartY = e.touches[0].pageY;
     this.touchStartTime = Date.now();
     this.isTouchMove = false;
+    this.totalMoveDistance = 0;
   },
   
   onAssetTouchMove: function(e) {
@@ -359,25 +376,32 @@ Page({
     const deltaX = moveX - this.touchStartX;
     const deltaY = moveY - this.touchStartY;
     
-    // 如果Y方向移动大于X方向，认为是上下滚动，不处理左右滑动
+    // 计算总移动距离
+    this.totalMoveDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    
+    // 如果Y方向移动大于X方向，不处理左右滑动，让页面自然滚动
     if (Math.abs(deltaY) > Math.abs(deltaX)) {
+      this.isTouchMove = true;
       return;
     }
     
-    this.isTouchMove = true;
-    
-    // 获取当前触摸的资产ID
-    const assetId = e.currentTarget.dataset.id;
-    
-    // 向左滑动显示操作按钮，向右滑动隐藏
-    if (deltaX < -50) {
-      this.setData({
-        currentSlideAssetId: assetId
-      });
-    } else if (deltaX > 20) {
-      this.setData({
-        currentSlideAssetId: null
-      });
+    // 只有在水平滑动时才阻止事件冒泡
+    if (Math.abs(deltaX) > 10) {
+      this.isTouchMove = true;
+      
+      // 获取当前触摸的资产ID
+      const assetId = e.currentTarget.dataset.id;
+      
+      // 向左滑动显示操作按钮，向右滑动隐藏
+      if (deltaX < -50) {
+        this.setData({
+          currentSlideAssetId: assetId
+        });
+      } else if (deltaX > 20) {
+        this.setData({
+          currentSlideAssetId: null
+        });
+      }
     }
   },
   
@@ -385,38 +409,62 @@ Page({
     const touchEndTime = Date.now();
     const touchDuration = touchEndTime - this.touchStartTime;
     
-    // 如果触摸时间很短且没有明显移动，可能是点击
-    if (touchDuration < 150 && !this.isTouchMove) {
-      this.goToDetail(e);
+    // 只有在触摸时间短且移动距离小的情况下才触发点击事件
+    if (touchDuration < 150 && !this.isTouchMove && this.totalMoveDistance < 10) {
+      // this.goToDetail(e);
     }
   },
   
   // 编辑资产
   editAsset: function(e) {
-    const assetId = e.currentTarget.dataset.id;
-    wx.navigateTo({
-      url: '/pages/add/add?id=' + assetId
+    const id = e.currentTarget.dataset.id;
+    console.log('编辑资产', id);
+    
+    // 隐藏滑动操作区
+    this.setData({
+      currentSlideAssetId: null
     });
     
-    // 关闭滑动选项
-    this.closeSlideOptions();
+    // 跳转到编辑页面
+    wx.navigateTo({
+      url: `/pages/add/add?id=${id}`
+    });
   },
   
   // 删除资产
   deleteAsset: function(e) {
-    const assetId = e.currentTarget.dataset.id;
+    const id = e.currentTarget.dataset.id;
     
+    // 查找对应的资产
+    const asset = this.data.assets.find(a => a.id === id);
+    if (!asset) {
+      console.error('找不到对应ID的资产:', id);
+      return;
+    }
+    
+    const name = asset.name;
+    
+    // 显示删除确认对话框
     wx.showModal({
-      title: '确认删除',
-      content: '确定要删除这个资产吗？',
+      title: '删除确认',
+      content: `确定要删除"${name}"吗？此操作不可恢复。`,
+      confirmColor: '#FA5151',
       success: (res) => {
+        // 隐藏滑动操作区
+        this.setData({
+          currentSlideAssetId: null
+        });
+        
         if (res.confirm) {
-          const result = assetManager.deleteAsset(assetId);
+          const result = assetManager.deleteAsset(id);
           if (result) {
+            // 显示删除成功提示
             wx.showToast({
               title: '删除成功',
               icon: 'success'
             });
+            
+            // 重新加载资产列表
             this.loadAssets();
           } else {
             wx.showToast({
@@ -427,69 +475,194 @@ Page({
         }
       }
     });
-    
-    // 关闭滑动选项
-    this.closeSlideOptions();
   },
   
   // 置顶资产
   topAsset: function(e) {
-    const assetId = e.currentTarget.dataset.id;
+    const id = e.currentTarget.dataset.id;
+    console.log('置顶资产', id);
     
-    // 获取所有资产
-    const allAssets = assetManager.getAllAssets();
-    const assetIndex = allAssets.findIndex(asset => asset.id === assetId);
+    // 获取当前资产列表
+    const assets = this.data.assets;
+    const asset = assets.find(a => a.id === id);
     
-    if (assetIndex > -1) {
-      // 取出要置顶的资产
-      const asset = allAssets[assetIndex];
+    if (!asset) {
+      wx.showToast({
+        title: '资产不存在',
+        icon: 'none'
+      });
+      return;
+    }
+    
+    // 从列表中移除该资产
+    const newAssets = assets.filter(a => a.id !== id);
+    // 将资产添加到列表开头
+    newAssets.unshift(asset);
+    
+    // 更新本地存储
+    try {
+      wx.setStorageSync('assets', newAssets);
       
-      // 从数组中移除
-      allAssets.splice(assetIndex, 1);
-      
-      // 添加到数组开头
-      allAssets.unshift(asset);
-      
-      // 保存更新后的资产列表
-      wx.setStorageSync('assets', allAssets);
-      
-      // 重新加载资产列表
-      this.loadAssets();
+      // 更新页面数据
+      this.setData({
+        assets: newAssets,
+        filteredAssets: this.data.selectedCategory === '全部' ? newAssets : newAssets.filter(a => a.category === this.data.selectedCategory),
+        currentSlideAssetId: null
+      });
       
       wx.showToast({
         title: '置顶成功',
         icon: 'success'
       });
+    } catch (error) {
+      console.error('置顶资产失败:', error);
+      wx.showToast({
+        title: '置顶失败',
+        icon: 'none'
+      });
     }
-    
-    // 关闭滑动选项
-    this.closeSlideOptions();
   },
   
-  // 关闭滑动选项
-  closeSlideOptions: function() {
+  // 显示资产详情
+  showAssetDetail: function(e) {
+    const id = e.currentTarget.dataset.id;
+    const asset = assetManager.getAssetById(id);
+    
+    if (asset) {
+      // 格式化一些数据，例如类别的小写形式用于样式
+      const categoryLower = asset.category ? asset.category.toLowerCase() : 'other';
+      const iconColor = asset.iconColor || 'blue';
+
+      // 判断是否过保
+      let isExpired = false;
+      if (asset.warrantyDate) {
+        const warrantyDate = new Date(asset.warrantyDate);
+        const today = new Date();
+        isExpired = today > warrantyDate;
+      }
+      
+      // 计算使用天数和日均成本
+      let usageDays = 0;
+      let dailyCost = 0;
+      
+      if (asset.purchaseDate) {
+        const purchaseDate = new Date(asset.purchaseDate);
+        const today = new Date();
+        const diffTime = Math.abs(today - purchaseDate);
+        usageDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (usageDays > 0 && asset.price) {
+          dailyCost = (asset.price / usageDays).toFixed(2);
+        }
+      }
+      
+      this.setData({
+        detailAsset: {
+          ...asset,
+          categoryLower,
+          iconColor,
+          isExpired,
+          usageDays: usageDays || 0,
+          dailyCost: dailyCost || 0
+        },
+        showDetailPopup: true
+      });
+    } else {
+      wx.showToast({
+        title: '获取资产信息失败',
+        icon: 'none'
+      });
+    }
+  },
+  
+  // 关闭资产详情弹出层
+  closeAssetDetail: function() {
     this.setData({
-      currentSlideAssetId: null
+      showDetailPopup: false
     });
   },
   
-  // 前往资产详情页
-  goToDetail: function(e) {
-    const assetId = e.currentTarget.dataset.id;
+  // 阻止事件冒泡
+  stopPropagation: function(e) {
+    // 阻止点击内容区域触发关闭事件
+    return false;
+  },
+  
+  // 预览详情中的图片
+  previewDetailImage: function(e) {
+    const src = e.currentTarget.dataset.src;
+    if (!src) return;
+    
+    const urls = this.data.detailAsset.imagePaths || [];
+    wx.previewImage({
+      current: src,
+      urls: urls
+    });
+  },
+  
+  // 编辑详情资产
+  editDetailAsset: function() {
+    if (!this.data.detailAsset) return;
+    
+    const id = this.data.detailAsset.id;
+    
+    // 关闭弹窗并跳转到编辑页
+    this.closeAssetDetail();
+    
     wx.navigateTo({
-      url: '/pages/detail/detail?id=' + assetId
+      url: `/pages/add/add?id=${id}`
+    });
+  },
+  
+  // 删除详情中的资产
+  deleteDetailAsset: function() {
+    if (!this.data.detailAsset) return;
+    
+    const id = this.data.detailAsset.id;
+    const name = this.data.detailAsset.name;
+    
+    wx.showModal({
+      title: '删除确认',
+      content: `确定要删除"${name}"吗？此操作不可恢复。`,
+      confirmColor: '#FA5151',
+      success: (res) => {
+        if (res.confirm) {
+          const result = assetManager.deleteAsset(id);
+          if (result) {
+            // 关闭弹出层
+            this.closeAssetDetail();
+            
+            // 显示删除成功提示
+            wx.showToast({
+              title: '删除成功',
+              icon: 'success'
+            });
+            
+            // 重新加载资产列表
+            this.loadAssets();
+          } else {
+            wx.showToast({
+              title: '删除失败',
+              icon: 'none'
+            });
+          }
+        }
+      }
     });
   },
   
   // 前往添加资产页
   goToAdd: function() {
+    console.log('点击添加资产按钮');
+    
+    // 先设置刷新标记
+    this.setData({
+      refreshOnAdd: true
+    });
+    
+    // 导航到添加页面
     wx.navigateTo({
-      url: '/pages/add/add',
-      success: () => {
-        this.setData({
-          refreshOnAdd: true
-        });
-      }
+      url: '/pages/add/add'
     });
   },
   
@@ -577,5 +750,55 @@ Page({
         duration: 1500
       });
     }, 800);
-  }
+  },
+  
+  // 保留原有goToDetail方法以保持兼容性
+  goToDetail: function(e) {
+    const id = e.currentTarget.dataset.id;
+    // 改为调用showAssetDetail方法
+    this.showAssetDetail(e);
+  },
+  
+  // 分享资产
+  shareAsset: function() {
+    if (!this.data.detailAsset) return;
+    
+    const asset = this.data.detailAsset;
+    
+    // 准备分享内容
+    const shareText = `我的资产: ${asset.name}\n购买价格: ¥${asset.price}\n使用天数: ${asset.usageDays}天\n日均成本: ¥${asset.dailyCost}/天`;
+    
+    // 复制到剪贴板
+    wx.setClipboardData({
+      data: shareText,
+      success: () => {
+        wx.showToast({
+          title: '已复制到剪贴板',
+          icon: 'success'
+        });
+      }
+    });
+    
+    // 也可以使用小程序的分享功能
+    wx.showShareMenu({
+      withShareTicket: true,
+      menus: ['shareAppMessage', 'shareTimeline']
+    });
+  },
+  
+  // 增强UI交互，点击图标放大效果
+  onIconTap: function() {
+    if (!this.data.detailAsset) return;
+    
+    // 添加一个临时类来执行动画效果
+    this.setData({
+      iconAnimating: true
+    });
+    
+    setTimeout(() => {
+      this.setData({
+        iconAnimating: false
+      });
+    }, 300);
+  },
 }); 

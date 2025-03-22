@@ -5,10 +5,12 @@
       <!-- 图标选择区 -->
       <view class="form-section">
         <view class="form-item">
-          <text class="icon-title">选择图标</text>
-          <view class="icon-selector" bindtap="showIconPicker">
-            <view class="selected-icon">
-              <text class="fa {{selectedIcon || 'fa-tag'}}"></text>
+          <view class="form-content" bindtap="showIconPicker">
+            <view class="icon-preview icon-color-{{selectedColor}}">
+              <view class="detail-icon-wrapper asset-icon-{{categoryId ? categoryText.toLowerCase() : 'asset-icon-other'}} {{iconAnimating ? 'icon-animating' : ''}}">
+                <text class="fa {{iconClass}}"></text>
+              </view>
+              <text class="icon-select-text">{{iconName || '点击选择图标'}}</text>
             </view>
           </view>
         </view>
@@ -19,18 +21,18 @@
         <!-- 资产名称 -->
         <view class="form-item">
           <view class="item-icon">
-            <text class="icon icon-tag"></text>
+            <text class="fa fa-tag"></text>
           </view>
-          <text class="form-label">资产名称</text>
+          <text class="form-label"><text class="required-mark">*</text> 资产名称</text>
           <input class="form-input" placeholder="请输入资产名称" value="{{name}}" bindinput="bindKeyInput" data-field="name" />
         </view>
         
         <!-- 购买价格 -->
         <view class="form-item">
           <view class="item-icon">
-            <text class="icon icon-price"></text>
+            <text class="fa fa-yen-sign"></text>
           </view>
-          <text class="form-label">购买价格</text>
+          <text class="form-label"><text class="required-mark">*</text> 购买价格</text>
           <input class="form-input" type="digit" placeholder="请输入金额" value="{{price}}" bindinput="bindKeyInput" data-field="price" />
           <text class="unit-text">元</text>
         </view>
@@ -38,21 +40,25 @@
         <!-- 购买日期 -->
         <view class="form-item">
           <view class="item-icon">
-            <text class="icon icon-calendar"></text>
+            <text class="fa fa-calendar-alt"></text>
           </view>
-          <text class="form-label">购买日期</text>
+          <text class="form-label"><text class="required-mark">*</text> 购买日期</text>
           <picker mode="date" bindchange="bindDateChange" data-field="purchaseDate" value="{{purchaseDate}}">
             <view class="form-input picker-view">
-              <text>{{purchaseDate || '选择日期'}}</text>
+              {{purchaseDate || '选择日期'}}
             </view>
           </picker>
           <text class="chevron-right icon icon-right"></text>
         </view>
-        
+
+      </view>
+      
+      <!-- 附加信息 -->
+      <view class="form-section">
         <!-- 资产分类 -->
         <view class="form-item">
           <view class="item-icon">
-            <text class="icon icon-folder"></text>
+            <text class="fa fa-folder"></text>
           </view>
           <text class="form-label">资产分类</text>
           <view class="form-input picker-view" bindtap="showCategoryPicker">
@@ -60,14 +66,11 @@
           </view>
           <text class="chevron-right icon icon-right"></text>
         </view>
-      </view>
-      
-      <!-- 附加信息 -->
-      <view class="form-section">
+        
         <!-- 保修日期 -->
         <view class="form-item">
           <view class="item-icon">
-            <text class="icon icon-shield"></text>
+            <text class="fa fa-shield-alt"></text>
           </view>
           <text class="form-label">保修日期</text>
           <picker mode="date" bindchange="bindDateChange" data-field="warrantyDate" value="{{warrantyDate}}">
@@ -77,6 +80,37 @@
           </picker>
           <text class="chevron-right icon icon-right"></text>
         </view>
+
+        <!-- 使用状态（开关） -->
+        <view class="form-item">
+          <view class="item-icon">
+            <text class="fa fa-info-circle"></text>
+          </view>
+          <text class="form-label">使用状态</text>
+          <view class="form-input switch-container">
+            <text class="status-text">{{statusActive ? '使用中' : '停用'}}</text>
+            <switch checked="{{statusActive}}" bindchange="toggleStatus" color="#4CAF50" />
+          </view>
+        </view>
+
+        <!-- 使用次数（带加减按钮） -->
+        <view class="form-item">
+          <view class="item-icon">
+            <text class="fa fa-sync-alt"></text>
+          </view>
+          <text class="form-label">使用次数</text>
+          <view class="form-input counter-container">
+            <view class="counter-btn minus" bindtap="decreaseUsageCount">
+              <text class="fa fa-minus"></text>
+            </view>
+            <input class="counter-input" type="number" value="{{usageCount}}" bindinput="bindKeyInput" data-field="usageCount" />
+            <view class="counter-btn plus" bindtap="increaseUsageCount">
+              <text class="fa fa-plus"></text>
+            </view>
+          </view>
+          <text class="unit-text">次</text>
+        </view>
+        
       </view>
         
       <!-- 图片上传区域 -->
@@ -89,20 +123,20 @@
         <!-- 图片预览区域 -->
         <view class="image-preview-list" wx:if="{{tempImagePaths && tempImagePaths.length > 0}}">
           <view class="image-preview-item" wx:for="{{tempImagePaths}}" wx:key="index">
-            <image class="preview-image" src="{{item}}" mode="aspectFill"></image>
+            <image class="preview-image" src="{{item}}" mode="aspectFill" bindtap="previewImage" data-src="{{item}}"></image>
             <view class="delete-image" catchtap="deleteImage" data-index="{{index}}">
-              <text class="icon icon-close"></text>
+              <text class="fa fa-times"></text>
             </view>
           </view>
           <view class="image-preview-item add-more" wx:if="{{tempImagePaths.length < 9}}" bindtap="chooseImage">
-            <text class="icon icon-plus"></text>
+            <text class="fa fa-plus"></text>
           </view>
         </view>
         
         <!-- 空状态上传区 -->
         <view class="upload-area" bindtap="chooseImage" wx:if="{{!tempImagePaths || tempImagePaths.length === 0}}">
           <view class="upload-content">
-            <text class="icon icon-camera"></text>
+            <text class="fa fa-camera"></text>
             <text class="upload-text">点击上传照片</text>
           </view>
         </view>
@@ -131,68 +165,441 @@
   <view class="picker-container {{showCategoryPicker ? 'show' : ''}}">
     <view class="picker-header">
       <text>选择分类</text>
-      <text class="icon icon-close" bindtap="hideCategoryPicker"></text>
+      <view class="close-btn" bindtap="hideCategoryPicker">
+        <text class="fa fa-times"></text>
+      </view>
     </view>
     <view class="picker-content">
-      <view class="picker-item" wx:for="{{categoryList}}" wx:key="id" bindtap="selectCategory" data-category="{{item}}">
+      <view class="picker-item" wx:for="{{categoryList}}" wx:key="id" bindtap="selectAssetCategory" data-category="{{item}}">
         <text>{{item.name}}</text>
-        <text class="icon icon-check" wx:if="{{categoryId === item.id}}"></text>
+        <text class="fa fa-check" wx:if="{{categoryId === item.id}}"></text>
       </view>
     </view>
   </view>
   
-  <!-- 图标选择器 -->
-  <view class="picker-mask" wx:if="{{showIconPicker}}" bindtap="hideIconPicker"></view>
-  <view class="picker-container {{showIconPicker ? 'show' : ''}}">
-    <view class="picker-header">
-      <text>选择图标</text>
-      <text class="icon icon-close" bindtap="hideIconPicker"></text>
+  <!-- 遮罩层 -->
+  <view class="mask {{showIcons ? 'show' : ''}}" bindtap="closeIconPicker"></view>
+  
+  <!-- 图标选择 -->
+  <view class="icon-picker {{showIcons ? 'show' : ''}} icon-color-{{selectedColor}}">
+    <!-- 图标分类选择 -->
+    <view class="icon-categories">
+      <view class="icon-category {{currentCategory === 'electronic' ? 'active' : ''}}" 
+            bindtap="selectIconCategory" data-category="electronic">电子产品</view>
+      <view class="icon-category {{currentCategory === 'furniture' ? 'active' : ''}}" 
+            bindtap="selectIconCategory" data-category="furniture">家具家居</view>
+      <view class="icon-category {{currentCategory === 'transport' ? 'active' : ''}}" 
+            bindtap="selectIconCategory" data-category="transport">交通工具</view>
+      <view class="icon-category {{currentCategory === 'entertainment' ? 'active' : ''}}" 
+            bindtap="selectIconCategory" data-category="entertainment">娱乐</view>
+      <view class="icon-category {{currentCategory === 'clothing' ? 'active' : ''}}" 
+            bindtap="selectIconCategory" data-category="clothing">服饰</view>
+      <view class="icon-category {{currentCategory === 'kitchen' ? 'active' : ''}}" 
+            bindtap="selectIconCategory" data-category="kitchen">厨房</view>
+      <view class="icon-category {{currentCategory === 'other' ? 'active' : ''}}" 
+            bindtap="selectIconCategory" data-category="other">其他</view>
     </view>
-    <view class="picker-content">
-      <view class="icon-grid">
-        <view class="icon-item {{selectedIcon === 'fa-laptop' ? 'selected' : ''}}" bindtap="selectIcon" data-icon="fa-laptop">
-          <text class="icon icon-laptop"></text>
-        </view>
-        <view class="icon-item {{selectedIcon === 'fa-mobile' ? 'selected' : ''}}" bindtap="selectIcon" data-icon="fa-mobile">
-          <text class="icon icon-mobile"></text>
-        </view>
-        <view class="icon-item {{selectedIcon === 'fa-car' ? 'selected' : ''}}" bindtap="selectIcon" data-icon="fa-car">
-          <text class="icon icon-car"></text>
-        </view>
-        <view class="icon-item {{selectedIcon === 'fa-home' ? 'selected' : ''}}" bindtap="selectIcon" data-icon="fa-home">
-          <text class="icon icon-home"></text>
-        </view>
-        <view class="icon-item {{selectedIcon === 'fa-suitcase' ? 'selected' : ''}}" bindtap="selectIcon" data-icon="fa-suitcase">
-          <text class="icon icon-suitcase"></text>
-        </view>
-        <view class="icon-item {{selectedIcon === 'fa-camera' ? 'selected' : ''}}" bindtap="selectIcon" data-icon="fa-camera">
-          <text class="icon icon-camera"></text>
-        </view>
-        <view class="icon-item {{selectedIcon === 'fa-headphones' ? 'selected' : ''}}" bindtap="selectIcon" data-icon="fa-headphones">
-          <text class="icon icon-headphones"></text>
-        </view>
-        <view class="icon-item {{selectedIcon === 'fa-gamepad' ? 'selected' : ''}}" bindtap="selectIcon" data-icon="fa-gamepad">
-          <text class="icon icon-gamepad"></text>
-        </view>
-        <view class="icon-item {{selectedIcon === 'fa-bicycle' ? 'selected' : ''}}" bindtap="selectIcon" data-icon="fa-bicycle">
-          <text class="icon icon-bicycle"></text>
-        </view>
-        <view class="icon-item {{selectedIcon === 'fa-tv' ? 'selected' : ''}}" bindtap="selectIcon" data-icon="fa-tv">
-          <text class="icon icon-tv"></text>
-        </view>
-        <view class="icon-item {{selectedIcon === 'fa-book' ? 'selected' : ''}}" bindtap="selectIcon" data-icon="fa-book">
-          <text class="icon icon-book"></text>
-        </view>
-        <view class="icon-item {{selectedIcon === 'fa-diamond' ? 'selected' : ''}}" bindtap="selectIcon" data-icon="fa-diamond">
-          <text class="icon icon-diamond"></text>
-        </view>
-        <view class="icon-item {{selectedIcon === 'fa-gift' ? 'selected' : ''}}" bindtap="selectIcon" data-icon="fa-gift">
-          <text class="icon icon-gift"></text>
-        </view>
-        <view class="icon-item {{selectedIcon === 'fa-tag' ? 'selected' : ''}}" bindtap="selectIcon" data-icon="fa-tag">
-          <text class="icon icon-tag"></text>
-        </view>
+    
+    <!-- 颜色选择 -->
+    <view class="color-options">
+      <view class="color-option {{selectedColor === 'blue' ? 'selected' : ''}}" 
+            bindtap="selectColor" data-color="blue">
+        <view class="color-dot color-blue"></view>
+      </view>
+      <view class="color-option {{selectedColor === 'green' ? 'selected' : ''}}" 
+            bindtap="selectColor" data-color="green">
+        <view class="color-dot color-green"></view>
+      </view>
+      <view class="color-option {{selectedColor === 'orange' ? 'selected' : ''}}" 
+            bindtap="selectColor" data-color="orange">
+        <view class="color-dot color-orange"></view>
+      </view>
+      <view class="color-option {{selectedColor === 'red' ? 'selected' : ''}}" 
+            bindtap="selectColor" data-color="red">
+        <view class="color-dot color-red"></view>
+      </view>
+      <view class="color-option {{selectedColor === 'purple' ? 'selected' : ''}}" 
+            bindtap="selectColor" data-color="purple">
+        <view class="color-dot color-purple"></view>
+      </view>
+      <view class="color-option {{selectedColor === 'cyan' ? 'selected' : ''}}" 
+            bindtap="selectColor" data-color="cyan">
+        <view class="color-dot color-cyan"></view>
+      </view>
+      <view class="color-option {{selectedColor === 'brown' ? 'selected' : ''}}" 
+            bindtap="selectColor" data-color="brown">
+        <view class="color-dot color-brown"></view>
+      </view>
+      <view class="color-option {{selectedColor === 'gray' ? 'selected' : ''}}" 
+            bindtap="selectColor" data-color="gray">
+        <view class="color-dot color-gray"></view>
       </view>
     </view>
+    
+    <!-- 电子产品图标 -->
+    <view class="icon-grid" wx:if="{{currentCategory === 'electronic'}}">
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-mobile-alt">
+        <text class="fa fa-mobile-alt"></text>
+        <text class="icon-name">手机</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-laptop">
+        <text class="fa fa-laptop"></text>
+        <text class="icon-name">笔记本</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-desktop">
+        <text class="fa fa-desktop"></text>
+        <text class="icon-name">台式机</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-headphones">
+        <text class="fa fa-headphones"></text>
+        <text class="icon-name">耳机</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-camera">
+        <text class="fa fa-camera"></text>
+        <text class="icon-name">相机</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-tv">
+        <text class="fa fa-tv"></text>
+        <text class="icon-name">电视</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-keyboard">
+        <text class="fa fa-keyboard"></text>
+        <text class="icon-name">键盘</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-mouse">
+        <text class="fa fa-mouse"></text>
+        <text class="icon-name">鼠标</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-tablet-alt">
+        <text class="fa fa-tablet-alt"></text>
+        <text class="icon-name">平板</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-watch">
+        <text class="fa fa-watch"></text>
+        <text class="icon-name">手表</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-laptop-code">
+        <text class="fa fa-laptop-code"></text>
+        <text class="icon-name">开发本</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-print">
+        <text class="fa fa-print"></text>
+        <text class="icon-name">打印机</text>
+      </view>
+    </view>
+    
+    <!-- 家具图标 -->
+    <view class="icon-grid" wx:if="{{currentCategory === 'furniture'}}">
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-couch">
+        <text class="fa fa-couch"></text>
+        <text class="icon-name">沙发</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-bed">
+        <text class="fa fa-bed"></text>
+        <text class="icon-name">床</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-chair">
+        <text class="fa fa-chair"></text>
+        <text class="icon-name">椅子</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-table">
+        <text class="fa fa-table"></text>
+        <text class="icon-name">桌子</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-bath">
+        <text class="fa fa-bath"></text>
+        <text class="icon-name">浴缸</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-lightbulb">
+        <text class="fa fa-lightbulb"></text>
+        <text class="icon-name">灯泡</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-toilet">
+        <text class="fa fa-toilet"></text>
+        <text class="icon-name">马桶</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-shower">
+        <text class="fa fa-shower"></text>
+        <text class="icon-name">淋浴</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-sink">
+        <text class="fa fa-sink"></text>
+        <text class="icon-name">水槽</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-door-open">
+        <text class="fa fa-door-open"></text>
+        <text class="icon-name">门</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-fan">
+        <text class="fa fa-fan"></text>
+        <text class="icon-name">风扇</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-box">
+        <text class="fa fa-box"></text>
+        <text class="icon-name">盒子</text>
+      </view>
+    </view>
+    
+    <!-- 交通工具图标 -->
+    <view class="icon-grid" wx:if="{{currentCategory === 'transport'}}">
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-car">
+        <text class="fa fa-car"></text>
+        <text class="icon-name">汽车</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-bicycle">
+        <text class="fa fa-bicycle"></text>
+        <text class="icon-name">自行车</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-motorcycle">
+        <text class="fa fa-motorcycle"></text>
+        <text class="icon-name">摩托车</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-bus">
+        <text class="fa fa-bus"></text>
+        <text class="icon-name">公交车</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-subway">
+        <text class="fa fa-subway"></text>
+        <text class="icon-name">地铁</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-train">
+        <text class="fa fa-train"></text>
+        <text class="icon-name">火车</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-plane">
+        <text class="fa fa-plane"></text>
+        <text class="icon-name">飞机</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-ship">
+        <text class="fa fa-ship"></text>
+        <text class="icon-name">轮船</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-truck">
+        <text class="fa fa-truck"></text>
+        <text class="icon-name">卡车</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-rocket">
+        <text class="fa fa-rocket"></text>
+        <text class="icon-name">火箭</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-helicopter">
+        <text class="fa fa-helicopter"></text>
+        <text class="icon-name">直升机</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-tractor">
+        <text class="fa fa-tractor"></text>
+        <text class="icon-name">拖拉机</text>
+      </view>
+    </view>
+    
+    <!-- 厨房图标 -->
+    <view class="icon-grid" wx:if="{{currentCategory === 'kitchen'}}">
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-blender">
+        <text class="fa fa-blender"></text>
+        <text class="icon-name">搅拌机</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-coffee">
+        <text class="fa fa-coffee"></text>
+        <text class="icon-name">咖啡机</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-mug-hot">
+        <text class="fa fa-mug-hot"></text>
+        <text class="icon-name">热饮杯</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-utensils">
+        <text class="fa fa-utensils"></text>
+        <text class="icon-name">餐具</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-pizza-slice">
+        <text class="fa fa-pizza-slice"></text>
+        <text class="icon-name">披萨</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-wine-glass">
+        <text class="fa fa-wine-glass"></text>
+        <text class="icon-name">酒杯</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-hamburger">
+        <text class="fa fa-hamburger"></text>
+        <text class="icon-name">汉堡</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-blender-phone">
+        <text class="fa fa-blender-phone"></text>
+        <text class="icon-name">搅拌器</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-pepper-hot">
+        <text class="fa fa-pepper-hot"></text>
+        <text class="icon-name">辣椒</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-carrot">
+        <text class="fa fa-carrot"></text>
+        <text class="icon-name">胡萝卜</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-ice-cream">
+        <text class="fa fa-ice-cream"></text>
+        <text class="icon-name">冰淇淋</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-cookie">
+        <text class="fa fa-cookie"></text>
+        <text class="icon-name">饼干</text>
+      </view>
+    </view>
+    
+    <!-- 娱乐图标 -->
+    <view class="icon-grid" wx:if="{{currentCategory === 'entertainment'}}">
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-gamepad">
+        <text class="fa fa-gamepad"></text>
+        <text class="icon-name">游戏手柄</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-dice">
+        <text class="fa fa-dice"></text>
+        <text class="icon-name">骰子</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-chess">
+        <text class="fa fa-chess"></text>
+        <text class="icon-name">国际象棋</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-bowling-ball">
+        <text class="fa fa-bowling-ball"></text>
+        <text class="icon-name">保龄球</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-guitar">
+        <text class="fa fa-guitar"></text>
+        <text class="icon-name">吉他</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-drum">
+        <text class="fa fa-drum"></text>
+        <text class="icon-name">鼓</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-headset">
+        <text class="fa fa-headset"></text>
+        <text class="icon-name">游戏耳机</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-football-ball">
+        <text class="fa fa-football-ball"></text>
+        <text class="icon-name">橄榄球</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-basketball-ball">
+        <text class="fa fa-basketball-ball"></text>
+        <text class="icon-name">篮球</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-baseball-ball">
+        <text class="fa fa-baseball-ball"></text>
+        <text class="icon-name">棒球</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-golf-ball">
+        <text class="fa fa-golf-ball"></text>
+        <text class="icon-name">高尔夫球</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-table-tennis">
+        <text class="fa fa-table-tennis"></text>
+        <text class="icon-name">乒乓球</text>
+      </view>
+    </view>
+    
+    <!-- 服饰图标 -->
+    <view class="icon-grid" wx:if="{{currentCategory === 'clothing'}}">
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-tshirt">
+        <text class="fa fa-tshirt"></text>
+        <text class="icon-name">T恤</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-hat-cowboy">
+        <text class="fa fa-hat-cowboy"></text>
+        <text class="icon-name">牛仔帽</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-socks">
+        <text class="fa fa-socks"></text>
+        <text class="icon-name">袜子</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-shoe-prints">
+        <text class="fa fa-shoe-prints"></text>
+        <text class="icon-name">鞋子</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-user-tie">
+        <text class="fa fa-user-tie"></text>
+        <text class="icon-name">西装</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-glasses">
+        <text class="fa fa-glasses"></text>
+        <text class="icon-name">眼镜</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-crown">
+        <text class="fa fa-crown"></text>
+        <text class="icon-name">皇冠</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-hat-wizard">
+        <text class="fa fa-hat-wizard"></text>
+        <text class="icon-name">巫师帽</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-mitten">
+        <text class="fa fa-mitten"></text>
+        <text class="icon-name">手套</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-vest">
+        <text class="fa fa-vest"></text>
+        <text class="icon-name">马甲</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-graduation-cap">
+        <text class="fa fa-graduation-cap"></text>
+        <text class="icon-name">学士帽</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-mask">
+        <text class="fa fa-mask"></text>
+        <text class="icon-name">面具</text>
+      </view>
+    </view>
+    
+    <!-- 其他图标 -->
+    <view class="icon-grid" wx:if="{{currentCategory === 'other'}}">
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-book">
+        <text class="fa fa-book"></text>
+        <text class="icon-name">书籍</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-gift">
+        <text class="fa fa-gift"></text>
+        <text class="icon-name">礼物</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-gem">
+        <text class="fa fa-gem"></text>
+        <text class="icon-name">宝石</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-tools">
+        <text class="fa fa-tools"></text>
+        <text class="icon-name">工具</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-briefcase">
+        <text class="fa fa-briefcase"></text>
+        <text class="icon-name">公文包</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-umbrella">
+        <text class="fa fa-umbrella"></text>
+        <text class="icon-name">雨伞</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-paint-brush">
+        <text class="fa fa-paint-brush"></text>
+        <text class="icon-name">画笔</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-pen">
+        <text class="fa fa-pen"></text>
+        <text class="icon-name">钢笔</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-coins">
+        <text class="fa fa-coins"></text>
+        <text class="icon-name">硬币</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-medal">
+        <text class="fa fa-medal"></text>
+        <text class="icon-name">奖牌</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-trophy">
+        <text class="fa fa-trophy"></text>
+        <text class="icon-name">奖杯</text>
+      </view>
+      <view class="icon-item" bindtap="selectIcon" data-icon="fa-heart">
+        <text class="fa fa-heart"></text>
+        <text class="icon-name">爱心</text>
+      </view>
+    </view>
+    
+    <!-- <view class="icon-close" bindtap="closeIconPicker">关闭</view> -->
   </view>
 </view> 

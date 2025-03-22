@@ -70,14 +70,9 @@ const dateUtil = {
     
     if (!start || !end) return 0;
     
-    // 转换为无时间的日期
-    const startDateOnly = new Date(start.getFullYear(), start.getMonth(), start.getDate());
-    const endDateOnly = new Date(end.getFullYear(), end.getMonth(), end.getDate());
-    
-    // 计算毫秒差并转换为天数
-    const diffTime = Math.abs(endDateOnly - startDateOnly);
+    const diffTime = Math.abs(start - end);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+  
     return diffDays;
   },
   

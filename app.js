@@ -5,7 +5,8 @@ App({
     theme: 'light',
     userInfo: null,
     themeColor: '#2C7EF8',
-    themeStyle: null
+    themeStyle: null,
+    needRefresh: false  // 控制首页刷新的标记
   },
 
   onLaunch: function () {
@@ -14,7 +15,7 @@ App({
     this.initTheme();
     
     // 初始化首次使用的资产数据，仅用于演示
-    this.initDemoAssets();
+    // this.initDemoAssets();
     
     // 初始化主题样式变量
     this.updateThemeStyle();

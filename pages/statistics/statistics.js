@@ -160,9 +160,43 @@ Page({
   // 前往资产详情页
   goToDetail: function(e) {
     const id = e.currentTarget.dataset.id;
-    wx.navigateTo({
-      url: `/pages/detail/detail?id=${id}`
-    });
+    // 获取首页实例
+    const pages = getCurrentPages();
+    let indexPage = null;
+    
+    // 寻找首页实例
+    for (let i = 0; i < pages.length; i++) {
+      if (pages[i].route === 'pages/index/index') {
+        indexPage = pages[i];
+        break;
+      }
+    }
+    
+    if (indexPage) {
+      // 如果找到首页实例，直接跳转到首页并展示详情弹窗
+      wx.switchTab({
+        url: '/pages/index/index',
+        success: function() {
+          // 延迟调用是为了确保页面已经完成跳转
+          setTimeout(function() {
+            const currentPages = getCurrentPages();
+            const currentPage = currentPages[currentPages.length - 1];
+            if (currentPage.route === 'pages/index/index') {
+              currentPage.showAssetDetail({
+                currentTarget: {
+                  dataset: { id: id }
+                }
+              });
+            }
+          }, 300);
+        }
+      });
+    } else {
+      // 如果找不到首页实例，直接跳转到首页
+      wx.switchTab({
+        url: '/pages/index/index'
+      });
+    }
   },
   
   // 格式化金额
