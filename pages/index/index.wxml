@@ -27,9 +27,6 @@
     <view class="overview-card">
       <view class="overview-title">
         <text>我的资产</text>
-        <view class="dropdown" bindtap="toggleCategoryDropdown">
-          {{selectedCategory}} <text class="fa fa-chevron-down dropdown-icon"></text>
-        </view>
         <view class="cost-mode-switch" bindtap="toggleCostMode" style="margin-left: auto;">
           <text class="cost-mode-text {{costMode === 'daily' ? 'active' : ''}}">日均</text>
           <text class="cost-mode-separator">/</text>
@@ -47,18 +44,55 @@
         </view>
       </view>
     </view>
-
-    <!-- 分类下拉选择 -->
-    <view class="category-dropdown" wx:if="{{showCategoryDropdown}}">
-      <view 
-        wx:for="{{categories}}" 
-        wx:key="*this" 
-        class="category-item {{selectedCategory === item ? 'active' : ''}}" 
-        data-category="{{item}}" 
-        bindtap="selectCategory"
-      >
-        {{item}}
-      </view>
+    
+    <!-- 筛选条件区域 -->
+    <view class="filter-container">
+      <!-- 搜索框 -->
+      
+      
+      <!-- 可横向滚动的筛选条件 -->
+      <scroll-view class="filter-scroll" scroll-x>
+        <view class="search-box {{showSearch ? 'expanded' : ''}}">
+          <view class="search-btn" bindtap="toggleSearch">
+            <text class="fa fa-search"></text>
+          </view>
+          <view class="search-input-wrap" wx:if="{{showSearch}}">
+            <input 
+              class="search-input" 
+              placeholder="搜索资产" 
+              value="{{searchKeyword}}"
+              bindinput="onSearchInput"
+              focus="{{showSearch}}"
+            />
+            <view class="search-clear" bindtap="clearSearch" wx:if="{{searchKeyword}}">
+              <text class="fa fa-times-circle"></text>
+            </view>
+          </view>
+        </view>
+        
+        <view class="filter-row">
+          <!-- 分类筛选 -->
+          <picker class="filter-item-box" bindchange="onCategoryChange" value="{{categoryIndex}}" range="{{categories}}">
+            <view class="filter-item">
+              {{selectedCategory}} <text class="fa fa-chevron-down dropdown-icon"></text>
+            </view>
+          </picker>
+          
+          <!-- 状态筛选 -->
+          <picker class="filter-item-box" bindchange="onStatusChange" value="{{statusIndex}}" range="{{statusOptions}}">
+            <view class="filter-item">
+              {{selectedStatus}} <text class="fa fa-chevron-down dropdown-icon"></text>
+            </view>
+          </picker>
+          
+          <!-- 排序筛选（多列选择器） -->
+          <picker class="filter-item-box" mode="multiSelector" bindchange="onSortChange" value="{{sortIndex}}" range="{{sortOptions}}">
+            <view class="filter-item">
+              {{sortName}} <text class="fa fa-chevron-down dropdown-icon"></text>
+            </view>
+          </picker>
+        </view>
+      </scroll-view>
     </view>
 
     <!-- 资产列表 -->
@@ -129,7 +163,7 @@
   </view>
 
   <!-- 浮动添加按钮 -->
-  <view class="floating-btn" bindtap="goToAdd">
+  <view class="floating-btn" bindtap="goToAdd" catchtouchstart="btnTouchStart" catchtouchmove="btnTouchMove" catchtouchend="btnTouchEnd" style="top:{{btnPosition.y}}px; left:{{btnPosition.x}}px;">
     <text class="fa fa-plus"></text>
   </view>
 

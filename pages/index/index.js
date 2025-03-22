@@ -23,9 +23,28 @@ Page({
     // 分类列表
     categories: [],
     // 当前选中的分类
-    selectedCategory: '',
+    selectedCategory: '全部分类',
+    // 当前选中的分类索引
+    categoryIndex: 0,
+    // 状态选项
+    statusOptions: ['全部状态', '使用中', '停用'],
+    // 当前选中的状态
+    selectedStatus: '全部状态',
+    // 当前选中的状态索引
+    statusIndex: 0,
+    // 排序多列选择器选项
+    sortOptions: [
+      ['默认排序', '价格', '使用天数', '购买时间', '日均成本', '次均成本'],
+      ['升序', '降序']
+    ],
+    // 当前选中的排序索引 [字段索引, 方式索引]
+    sortIndex: [0, 1],
+    // 当前选中的排序名称组合
+    sortName: '默认排序',
     // 搜索关键词
     searchKeyword: '',
+    // 是否显示搜索框
+    showSearch: false,
     // 是否正在加载
     loading: true,
     // 是否显示"我的资产"卡片
@@ -38,6 +57,11 @@ Page({
     showSlideOptions: false,
     // 当前滑动显示选项的资产ID
     currentSlideAssetId: null,
+    // 浮动按钮位置
+    btnPosition: {
+      x: 40,
+      y: 400
+    },
     
     // 资产分类样式
     categoryStyles: {
@@ -80,8 +104,45 @@ Page({
       showOverview: true,
       searchKeyword: '',
       assets: [],
-      filteredAssets: []
+      filteredAssets: [],
+      sortName: this.getSortName([0, 1])
     });
+    
+    // 获取系统信息设置合理的初始按钮位置
+    try {
+      const systemInfo = wx.getSystemInfoSync();
+      const screenWidth = systemInfo.windowWidth;
+      const screenHeight = systemInfo.windowHeight;
+      
+      // 尝试从缓存中读取按钮位置
+      const savedPosition = wx.getStorageSync('floatingBtnPosition');
+      
+      // 设置初始位置或使用缓存的位置
+      let btnPosition;
+      if (savedPosition) {
+        // 确保缓存的位置在屏幕范围内
+        btnPosition = {
+          x: Math.min(screenWidth - 60, Math.max(0, savedPosition.x)),
+          y: Math.min(screenHeight - 60, Math.max(0, savedPosition.y))
+        };
+      } else {
+        // 默认右下角位置，距离右边和底部各40px
+        btnPosition = {
+          x: screenWidth - 100,
+          y: screenHeight - 200
+        };
+      }
+      
+      this.setData({
+        btnPosition: btnPosition
+      });
+    } catch (e) {
+      console.error('初始化按钮位置失败:', e);
+      // 设置一个默认位置
+      this.setData({
+        btnPosition: {x: 40, y: 500}
+      });
+    }
     
     // 立即加载资产数据
     this.loadAssets();
@@ -159,13 +220,18 @@ Page({
         this.setData({
           assets: [],
           filteredAssets: [],
-          categories: ['全部'],
-          selectedCategory: '全部',
+          categories: ['全部分类'],
+          selectedCategory: '全部分类',
+          categoryIndex: 0,
+          selectedStatus: '全部状态',
+          statusIndex: 0,
+          sortIndex: [0, 1],
+          sortName: this.getSortName([0, 1]),
           totalAssets: 0,
-          totalValue: 0,
-          dailyAverage: 0,
-          usageAverage: 0,
-          currentAverage: 0,
+          totalValue: '0.00',
+          dailyAverage: '0.00',
+          usageAverage: '0.00',
+          currentAverage: '0.00',
           loading: false
         });
         return;
@@ -193,8 +259,12 @@ Page({
         // 处理分类小写
         const categoryLower = asset.category ? asset.category.toLowerCase() : 'default';
         
+        // 确保资产有状态值，默认为"使用中"
+        const status = asset.status || '使用中';
+        
         return {
           ...asset,
+          status: status, // 确保每个资产都有状态值
           usageDays: usageDays,
           dailyCost: dailyCost,
           usageCost: usageCost,
@@ -205,29 +275,37 @@ Page({
         };
       });
       
-      // 所有分类加上"全部"选项
-      const allCategories = ['全部', ...categories];
+      // 所有分类加上"全部分类"选项
+      const allCategories = ['全部分类', ...categories];
       
       // 根据当前模式计算要显示的成本
       const currentAverage = this.data.costMode === 'daily' ? 
-        overview.dailyAverage.toFixed(2) : 
-        overview.usageAverage.toFixed(2);
+        Number(overview.dailyAverage).toFixed(2) : 
+        Number(overview.usageAverage).toFixed(2);
       
       this.setData({
         assets: formattedAssets,
         filteredAssets: formattedAssets,
         categories: allCategories,
-        selectedCategory: '全部',
+        selectedCategory: '全部分类',
+        categoryIndex: 0,
+        selectedStatus: '全部状态',
+        statusIndex: 0,
+        sortIndex: [0, 1],
+        sortName: this.getSortName([0, 1]),
         totalAssets: formattedAssets.length,
-        totalValue: overview.totalValue.toFixed(2),
-        dailyAverage: overview.dailyAverage.toFixed(2),
-        usageAverage: overview.usageAverage.toFixed(2),
+        totalValue: Number(overview.totalValue).toFixed(2),
+        dailyAverage: Number(overview.dailyAverage).toFixed(2),
+        usageAverage: Number(overview.usageAverage).toFixed(2),
         currentAverage: currentAverage,
         loading: false
       });
       
       // 搜索关键词或分类如果存在，则需要应用筛选
-      if (this.data.searchKeyword || (this.data.selectedCategory && this.data.selectedCategory !== '全部')) {
+      if (this.data.searchKeyword || 
+          (this.data.selectedCategory && this.data.selectedCategory !== '全部分类') ||
+          (this.data.selectedStatus && this.data.selectedStatus !== '全部状态') ||
+          (this.data.sortIndex && this.data.sortIndex[0] > 0)) {
         this.filterAssets();
       }
     } catch (e) {
@@ -256,6 +334,15 @@ Page({
     
     const price = parseFloat(asset.price);
     return (price / usageDays).toFixed(2);
+  },
+  
+  // 计算次均成本
+  calculateUsageCost: function(asset) {
+    if (!asset.price) return 0;
+    
+    const price = parseFloat(asset.price);
+    const usageCount = parseInt(asset.usageCount || 1);
+    return (price / Math.max(1, usageCount)).toFixed(2);
   },
   
   // 计算使用率
@@ -304,77 +391,141 @@ Page({
     });
   },
   
-  // 切换分类
-  selectCategory: function(e) {
-    const category = e.currentTarget.dataset.category;
+  // Picker分类变更
+  onCategoryChange: function(e) {
+    const index = e.detail.value;
+    const category = this.data.categories[index];
+    
     this.setData({
       selectedCategory: category,
-      showCategoryDropdown: false
+      categoryIndex: index
     }, () => {
       this.filterAssets();
     });
   },
   
-  // 显示/隐藏分类下拉菜单
-  toggleCategoryDropdown: function() {
+  // Picker状态变更
+  onStatusChange: function(e) {
+    const index = e.detail.value;
+    const status = this.data.statusOptions[index];
+    
     this.setData({
-      showCategoryDropdown: !this.data.showCategoryDropdown
+      selectedStatus: status,
+      statusIndex: index
+    }, () => {
+      this.filterAssets();
     });
   },
   
-  // 筛选资产列表
-  filterAssets: function() {
-    console.log('开始筛选资产');
+  // 组合排序名称
+  getSortName: function(indexArray) {
+    if (!this.data.sortOptions || !Array.isArray(this.data.sortOptions) || !indexArray) return '默认排序';
     
-    if (!this.data.assets || this.data.assets.length === 0) {
-      console.log('没有资产数据，筛选结束');
-      this.setData({
-        filteredAssets: [],
-        totalAssets: 0,
-        totalValue: 0,
-        dailyAverage: 0
-      });
-      return;
+    const fieldIndex = indexArray[0];
+    const directionIndex = indexArray[1];
+    
+    // 如果是默认排序，不显示排序方式
+    if (fieldIndex === 0) {
+      return this.data.sortOptions[0][fieldIndex];
     }
     
-    let filtered = [...this.data.assets];
-    
-    // 关键词筛选
-    if (this.data.searchKeyword) {
-      const keyword = this.data.searchKeyword.toLowerCase();
-      filtered = filtered.filter(asset => {
-        return (
-          (asset.name && asset.name.toLowerCase().includes(keyword)) || 
-          (asset.category && asset.category.toLowerCase().includes(keyword)) ||
-          (asset.description && asset.description.toLowerCase().includes(keyword))
-        );
-      });
-    }
-    
-    // 分类筛选
-    if (this.data.selectedCategory && this.data.selectedCategory !== '全部') {
-      filtered = filtered.filter(asset => asset.category === this.data.selectedCategory);
-    }
-    
-    // 计算筛选后的统计数据
-    let filteredTotalValue = 0;
-    let filteredDailyAverage = 0;
-    
-    filtered.forEach(asset => {
-      filteredTotalValue += Number(asset.price) || 0;
-      
-      const assetDailyCost = Number(asset.dailyCost) || 0;
-      filteredDailyAverage += assetDailyCost;
-    });
-    
-    // 保留两位小数
-    filteredDailyAverage = Number(filteredDailyAverage.toFixed(2));
+    // 组合字段和方式
+    return this.data.sortOptions[0][fieldIndex] + ' ' + this.data.sortOptions[1][directionIndex];
+  },
+  
+  // 多列排序选择器变更
+  onSortChange: function(e) {
+    const indexArray = e.detail.value;
+    const sortName = this.getSortName(indexArray);
     
     this.setData({
-      filteredAssets: filtered,
-      totalAssets: filtered.length,
-      totalValue: filteredTotalValue.toFixed(2),
-      dailyAverage: filteredDailyAverage
+      sortIndex: indexArray,
+      sortName: sortName
+    }, () => {
+      this.filterAssets();
+    });
+  },
+  
+  /**
+   * 筛选资产列表
+   */
+  filterAssets() {
+    const { assets, selectedCategory, selectedStatus, searchKeyword } = this.data;
+    // 筛选条件
+    const filteredAssets = assets.filter(item => {
+      // 分类筛选
+      if (selectedCategory !== '全部分类' && item.category !== selectedCategory) {
+        return false;
+      }
+      
+      // 状态筛选
+      if (selectedStatus === '使用中' && item.status !== 1) {
+        return false;
+      } else if (selectedStatus === '停用' && item.status !== 0) {
+        return false;
+      }
+      
+      // 搜索关键词筛选
+      if (searchKeyword && searchKeyword.trim() !== '') {
+        const keyword = searchKeyword.trim().toLowerCase();
+        return item.name.toLowerCase().includes(keyword) || 
+               (item.remark && item.remark.toLowerCase().includes(keyword)) ||
+               (item.category && item.category.toLowerCase().includes(keyword));
+      }
+      
+      return true;
+    });
+    
+    // 排序
+    const [fieldIndex, orderIndex] = this.data.sortIndex;
+    let sortedAssets = [...filteredAssets];
+    
+    // 如果不是默认排序，进行排序
+    if (fieldIndex > 0) {
+      const isAsc = orderIndex === 0; // 0表示升序，1表示降序
+      
+      sortedAssets.sort((a, b) => {
+        let valueA, valueB;
+        
+        // 根据选择的字段获取排序值
+        switch(fieldIndex) {
+          case 1: // 价格
+            valueA = a.price || 0;
+            valueB = b.price || 0;
+            break;
+          case 2: // 使用天数
+            valueA = a.usageDays || 0;
+            valueB = b.usageDays || 0;
+            break;
+          case 3: // 购买时间
+            valueA = a.buyDate ? new Date(a.buyDate).getTime() : 0;
+            valueB = b.buyDate ? new Date(b.buyDate).getTime() : 0;
+            break;
+          case 4: // 日均成本
+            valueA = a.dailyCost || 0;
+            valueB = b.dailyCost || 0;
+            break;
+          case 5: // 次均成本
+            valueA = a.usageCost || 0;
+            valueB = b.usageCost || 0;
+            break;
+          default:
+            return 0;
+        }
+        
+        // 根据排序方式返回结果
+        return isAsc ? valueA - valueB : valueB - valueA;
+      });
+    }
+    
+    this.setData({
+      filteredAssets: sortedAssets,
+      // 资产总数
+      assetCount: sortedAssets.length,
+      // 资产总价值
+      totalValue: sortedAssets.reduce((sum, item) => sum + (item.price || 0), 0).toFixed(2),
+      // 空状态提示文案
+      emptyText: this.getEmptyText()
     });
   },
   
@@ -525,7 +676,7 @@ Page({
       // 更新页面数据
       this.setData({
         assets: newAssets,
-        filteredAssets: this.data.selectedCategory === '全部' ? newAssets : newAssets.filter(a => a.category === this.data.selectedCategory),
+        filteredAssets: this.data.selectedCategory === '全部分类' ? newAssets : newAssets.filter(a => a.category === this.data.selectedCategory),
         currentSlideAssetId: null
       });
       
@@ -582,9 +733,13 @@ Page({
         usageCost = (asset.price / Math.max(1, usageCount)).toFixed(2);
       }
       
+      // 确保资产有状态值
+      const status = asset.status || '使用中';
+      
       this.setData({
         detailAsset: {
           ...asset,
+          status: status, // 确保详情中也显示正确的状态
           categoryLower,
           iconColor,
           isExpired,
@@ -678,16 +833,78 @@ Page({
     });
   },
   
-  // 前往添加资产页
-  goToAdd: function() {
-    console.log('点击添加资产按钮');
+  // 按钮触摸开始
+  btnTouchStart: function(e) {
+    this.startX = e.touches[0].clientX;
+    this.startY = e.touches[0].clientY;
+    this.isDragging = false;
+    this.btnStartPosition = {
+      x: this.data.btnPosition.x,
+      y: this.data.btnPosition.y
+    };
+  },
+  
+  // 按钮触摸移动
+  btnTouchMove: function(e) {
+    // 获取系统信息计算边界
+    const systemInfo = wx.getSystemInfoSync();
+    const screenWidth = systemInfo.windowWidth;
+    const screenHeight = systemInfo.windowHeight;
     
-    // 先设置刷新标记
+    // 计算tabBar位置（通常在底部，预留120px高度）
+    const tabBarTop = screenHeight - 90;
+    
+    // 计算按钮大小（约60px）
+    const btnSize = 60;
+    
+    // 计算移动距离
+    const moveX = e.touches[0].clientX - this.startX;
+    const moveY = e.touches[0].clientY - this.startY;
+    
+    // 如果移动距离足够大才认为是拖动
+    if (Math.abs(moveX) > 5 || Math.abs(moveY) > 5) {
+      this.isDragging = true;
+    }
+    
+    // 计算新位置（保持在屏幕内）
+    let newX = this.btnStartPosition.x + moveX;
+    let newY = this.btnStartPosition.y + moveY;
+    
+    // 边界检查：确保按钮不会超出屏幕
+    newX = Math.max(0, Math.min(screenWidth - btnSize, newX));
+    // 防止按钮拖到tabBar区域
+    newY = Math.max(0, Math.min(tabBarTop - btnSize, newY));
+    
+    // 更新按钮位置
     this.setData({
-      refreshOnAdd: true
+      btnPosition: {
+        x: newX,
+        y: newY
+      }
     });
+  },
+  
+  // 按钮触摸结束
+  btnTouchEnd: function(e) {
+    // 保存按钮位置到本地存储
+    wx.setStorageSync('floatingBtnPosition', this.data.btnPosition);
     
-    // 导航到添加页面
+    // 如果没有拖动，则视为点击，触发跳转
+    if (!this.isDragging) {
+      setTimeout(() => {
+        this.goToAdd();
+      }, 50); // 短暂延时避免可能的冲突
+    }
+    
+    // 重置拖动状态（延时重置，防止与点击事件冲突）
+    setTimeout(() => {
+      this.isDragging = false;
+    }, 100);
+  },
+  
+  // 跳转到添加页面
+  goToAdd: function() {
+    console.log('跳转到添加页面');
     wx.navigateTo({
       url: '/pages/add/add'
     });
@@ -833,10 +1050,13 @@ Page({
   toggleCostMode: function() {
     // 切换模式
     const newMode = this.data.costMode === 'daily' ? 'usage' : 'daily';
-    // 计算要显示的值
+    
+    // 确保数值格式化为两位小数
     const currentAverage = newMode === 'daily' ? 
-      this.data.dailyAverage : 
-      this.data.usageAverage;
+      Number(this.data.dailyAverage).toFixed(2) : 
+      Number(this.data.usageAverage).toFixed(2);
+    
+    console.log('切换成本模式:', newMode, '当前平均值:', currentAverage);
     
     // 更新状态
     this.setData({
@@ -844,13 +1064,37 @@ Page({
       currentAverage: currentAverage
     });
   },
-  
-  // 计算每次使用成本
-  calculateUsageCost: function(asset) {
-    if (!asset.price) return 0;
-    
-    const price = parseFloat(asset.price);
-    const usageCount = parseInt(asset.usageCount || 1);
-    return (price / Math.max(1, usageCount)).toFixed(2);
+
+  /**
+   * 切换搜索框显示状态
+   */
+  toggleSearch() {
+    this.setData({
+      showSearch: !this.data.showSearch
+    });
+  },
+
+  /**
+   * 处理搜索输入
+   */
+  onSearchInput(e) {
+    this.setData({
+      searchKeyword: e.detail.value
+    });
+    // 延迟执行搜索，避免频繁刷新
+    clearTimeout(this.searchTimer);
+    this.searchTimer = setTimeout(() => {
+      this.filterAssets();
+    }, 300);
+  },
+
+  /**
+   * 清除搜索内容
+   */
+  clearSearch() {
+    this.setData({
+      searchKeyword: ''
+    });
+    this.filterAssets();
   },
 }); 

@@ -56,7 +56,7 @@
   color: white;
   border-radius: 32rpx;
   padding: 40rpx;
-  margin-bottom: 32rpx;
+  margin-bottom: 24rpx;
   box-shadow: 0 20rpx 50rpx -10rpx rgba(44, 126, 248, 0.3);
 }
 
@@ -89,18 +89,99 @@
   font-weight: 600;
 }
 
-.dropdown {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 40rpx;
-  padding: 8rpx 24rpx;
-  font-size: 28rpx;
+/* 筛选区域样式 */
+.filter-container {
+  margin-bottom: 24rpx;
+}
+
+.filter-scroll {
+  white-space: nowrap;
+  padding: 0 24rpx;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.filter-row {
+  display: inline-flex;
+  padding: 10rpx 0;
+  gap: 20rpx;
+}
+
+.filter-item-box {
+  display: inline-block;
+  padding: 0;
+}
+
+.filter-item {
+  padding: 12rpx 20rpx;
+  background-color: #f6f6f6;
+  border-radius: 8rpx;
+  font-size: 26rpx;
+  color: #333;
   display: flex;
   align-items: center;
-  margin-left: 20rpx;
+  border: 1rpx solid #e0e0e0;
 }
 
 .dropdown-icon {
+  font-size: 20rpx;
   margin-left: 8rpx;
+  color: #999;
+}
+
+/* 搜索框样式 */
+.search-box {
+  display: flex;
+  align-items: center;
+  padding: 0 24rpx;
+  margin-bottom: 16rpx;
+  transition: all 0.3s;
+}
+
+.search-btn {
+  width: 64rpx;
+  height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f6f6f6;
+  border-radius: 32rpx;
+  color: #666;
+  z-index: 1;
+  flex-shrink: 0;
+  border: 1rpx solid #e0e0e0;
+}
+
+.search-input-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background-color: #f6f6f6;
+  border-radius: 32rpx;
+  padding: 0 16rpx 0 48rpx;
+  margin-left: -32rpx;
+  border: 1rpx solid #e0e0e0;
+  height: 64rpx;
+}
+
+.search-input {
+  flex: 1;
+  height: 64rpx;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.search-clear {
+  width: 48rpx;
+  height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+}
+
+.search-box.expanded .search-btn {
+  background-color: #f0f0f0;
 }
 
 /* 资产卡片外层容器 */
@@ -373,8 +454,6 @@
 /* 浮动添加按钮 */
 .floating-btn {
   position: fixed;
-  right: 40rpx;
-  bottom: 220rpx;
   width: 120rpx;
   height: 120rpx;
   border-radius: 60rpx;
@@ -496,42 +575,6 @@
 
 .empty-text {
   font-size: 28rpx;
-}
-
-/* 搜索框 */
-.search-box {
-  padding: 24rpx;
-  background-color: var(--color-card);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  margin-bottom: 10rpx;
-}
-
-.search-input-wrap {
-  display: flex;
-  align-items: center;
-  background-color: #F5F7FA;
-  height: 80rpx;
-  border-radius: 40rpx;
-  padding: 0 30rpx;
-}
-
-.search-icon {
-  font-size: 28rpx;
-  color: #999999;
-  margin-right: 20rpx;
-}
-
-.search-input {
-  flex: 1;
-  height: 80rpx;
-  font-size: 28rpx;
-  color: var(--color-text);
-}
-
-.search-placeholder {
-  color: #CCCCCC;
 }
 
 /* 分类选择 */

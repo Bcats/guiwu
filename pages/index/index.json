@@ -2,6 +2,6 @@
   "navigationBarTitleText": "归物盒子",
   "usingComponents": {},
   "disableScroll": false,
-  "enablePullDownRefresh": true,
+  "enablePullDownRefresh": false,
   "backgroundTextStyle": "dark"
 } 
