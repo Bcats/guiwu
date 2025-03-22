@@ -47,52 +47,57 @@
     
     <!-- 筛选条件区域 -->
     <view class="filter-container">
-      <!-- 搜索框 -->
-      
-      
-      <!-- 可横向滚动的筛选条件 -->
-      <scroll-view class="filter-scroll" scroll-x>
+      <view class="search-filter-row">
+        <!-- 搜索框 -->
         <view class="search-box {{showSearch ? 'expanded' : ''}}">
           <view class="search-btn" bindtap="toggleSearch">
             <text class="fa fa-search"></text>
           </view>
-          <view class="search-input-wrap" wx:if="{{showSearch}}">
-            <input 
-              class="search-input" 
-              placeholder="搜索资产" 
-              value="{{searchKeyword}}"
-              bindinput="onSearchInput"
-              focus="{{showSearch}}"
-            />
-            <view class="search-clear" bindtap="clearSearch" wx:if="{{searchKeyword}}">
-              <text class="fa fa-times-circle"></text>
+          <block wx:if="{{showSearch}}">
+            <view class="search-input-wrap">
+              <input 
+                class="search-input" 
+                placeholder="搜索资产" 
+                value="{{searchKeyword}}"
+                bindinput="onSearchInput"
+                focus="{{showSearch}}"
+              />
+              <view class="search-clear" bindtap="clearSearch" wx:if="{{searchKeyword}}">
+                <text class="fa fa-times-circle"></text>
+              </view>
             </view>
-          </view>
+            <view class="search-cancel" bindtap="toggleSearch">
+              <text>取消</text>
+            </view>
+          </block>
         </view>
         
-        <view class="filter-row">
-          <!-- 分类筛选 -->
-          <picker class="filter-item-box" bindchange="onCategoryChange" value="{{categoryIndex}}" range="{{categories}}">
-            <view class="filter-item">
-              {{selectedCategory}} <text class="fa fa-chevron-down dropdown-icon"></text>
-            </view>
-          </picker>
-          
-          <!-- 状态筛选 -->
-          <picker class="filter-item-box" bindchange="onStatusChange" value="{{statusIndex}}" range="{{statusOptions}}">
-            <view class="filter-item">
-              {{selectedStatus}} <text class="fa fa-chevron-down dropdown-icon"></text>
-            </view>
-          </picker>
-          
-          <!-- 排序筛选（多列选择器） -->
-          <picker class="filter-item-box" mode="multiSelector" bindchange="onSortChange" value="{{sortIndex}}" range="{{sortOptions}}">
-            <view class="filter-item">
-              {{sortName}} <text class="fa fa-chevron-down dropdown-icon"></text>
-            </view>
-          </picker>
-        </view>
-      </scroll-view>
+        <!-- 可横向滚动的筛选条件 -->
+        <scroll-view class="filter-scroll" scroll-x wx:if="{{!showSearch}}">
+          <view class="filter-row">
+            <!-- 分类筛选 -->
+            <picker class="filter-item-box" bindchange="onCategoryChange" value="{{categoryIndex}}" range="{{categories}}">
+              <view class="filter-item">
+                {{selectedCategory}} <text class="fa fa-chevron-down dropdown-icon"></text>
+              </view>
+            </picker>
+            
+            <!-- 状态筛选 -->
+            <picker class="filter-item-box" bindchange="onStatusChange" value="{{statusIndex}}" range="{{statusOptions}}">
+              <view class="filter-item">
+                {{selectedStatus}} <text class="fa fa-chevron-down dropdown-icon"></text>
+              </view>
+            </picker>
+            
+            <!-- 排序筛选（多列选择器） -->
+            <picker class="filter-item-box" mode="multiSelector" bindchange="onSortChange" value="{{sortIndex}}" range="{{sortOptions}}">
+              <view class="filter-item">
+                {{sortName}} <text class="fa fa-chevron-down dropdown-icon"></text>
+              </view>
+            </picker>
+          </view>
+        </scroll-view>
+      </view>
     </view>
 
     <!-- 资产列表 -->

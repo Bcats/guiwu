@@ -450,7 +450,7 @@ Page({
    * 筛选资产列表
    */
   filterAssets() {
-    const { assets, selectedCategory, selectedStatus, searchKeyword } = this.data;
+    const { assets, selectedCategory, selectedStatus, searchKeyword, costMode } = this.data;
     // 筛选条件
     const filteredAssets = assets.filter(item => {
       // 分类筛选
@@ -518,14 +518,41 @@ Page({
       });
     }
     
+    // 计算筛选后的资产总价值
+    const totalValue = sortedAssets.reduce((sum, item) => sum + (Number(item.price) || 0), 0).toFixed(2);
+    
+    // 重新计算筛选后的日均和次均成本
+    let dailyAverage = 0;
+    let usageAverage = 0;
+    
+    sortedAssets.forEach(asset => {
+      // 累加日均成本
+      dailyAverage += Number(asset.dailyCost) || 0;
+      
+      // 累加次均成本
+      usageAverage += Number(asset.usageCost) || 0;
+    });
+    
+    // 保留两位小数
+    dailyAverage = dailyAverage.toFixed(2);
+    usageAverage = usageAverage.toFixed(2);
+    
+    // 根据当前显示模式选择要显示的值
+    const currentAverage = costMode === 'daily' ? dailyAverage : usageAverage;
+    
     this.setData({
       filteredAssets: sortedAssets,
       // 资产总数
       assetCount: sortedAssets.length,
       // 资产总价值
-      totalValue: sortedAssets.reduce((sum, item) => sum + (item.price || 0), 0).toFixed(2),
+      totalValue: totalValue,
+      // 更新日均和次均成本
+      dailyAverage: dailyAverage,
+      usageAverage: usageAverage,
+      // 更新当前显示的成本值
+      currentAverage: currentAverage,
       // 空状态提示文案
-      emptyText: this.getEmptyText()
+      emptyText: '还没有添加任何资产'
     });
   },
   
@@ -1066,12 +1093,20 @@ Page({
   },
 
   /**
-   * 切换搜索框显示状态
+   * 切换搜索框显示
    */
   toggleSearch() {
     this.setData({
       showSearch: !this.data.showSearch
     });
+    // 如果关闭搜索框且有搜索关键词，则清空搜索
+    if (!this.data.showSearch && this.data.searchKeyword) {
+      this.clearSearch();
+    }
+    // 如果打开搜索框则聚焦输入框
+    if (this.data.showSearch) {
+      // 微信小程序中不需要手动聚焦，通过设置focus属性自动聚焦
+    }
   },
 
   /**
