@@ -6,13 +6,23 @@ App({
     userInfo: null,
     themeColor: '#2C7EF8',
     themeStyle: null,
-    needRefresh: false  // 控制首页刷新的标记
+    needRefresh: false,  // 控制首页刷新的标记
+    versionInfo: {
+      version: '',
+      updateTime: ''
+    }
   },
 
   onLaunch: function () {
     console.log('App onLaunch');
     // 初始化主题设置
     this.initTheme();
+    
+    // 获取版本信息
+    this.getVersionInfo();
+    
+    // 检查小程序更新
+    this.checkForUpdates();
     
     // 初始化首次使用的资产数据，仅用于演示
     // this.initDemoAssets();
@@ -23,6 +33,84 @@ App({
     // 监听网络状态变化
     wx.onNetworkStatusChange(function(res) {
       console.log('网络状态变化：', res.isConnected);
+    });
+  },
+
+  // 获取版本信息
+  getVersionInfo: function() {
+    try {
+      // 获取小程序版本信息
+      const accountInfo = wx.getAccountInfoSync ? wx.getAccountInfoSync() : {};
+      const version = (accountInfo.miniProgram && accountInfo.miniProgram.version) || '1.0.0';
+      
+      // 获取当前日期作为更新时间
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const updateTime = `${year}-${month}-${day}`;
+      
+      // 保存到全局数据
+      this.globalData.versionInfo = {
+        version: version,
+        updateTime: updateTime
+      };
+      
+      console.log('当前版本信息:', this.globalData.versionInfo);
+      return this.globalData.versionInfo;
+    } catch(e) {
+      console.error('获取版本信息失败:', e);
+      return {
+        version: '1.0.0',
+        updateTime: '2025-03-22'
+      };
+    }
+  },
+  
+  // 检查小程序更新
+  checkForUpdates: function() {
+    if (!wx.getUpdateManager) {
+      console.log('当前微信版本不支持自动更新');
+      return;
+    }
+    
+    // 获取小程序更新管理器
+    const updateManager = wx.getUpdateManager();
+    
+    // 监听向微信后台请求检查更新结果事件
+    updateManager.onCheckForUpdate(function(res) {
+      // res.hasUpdate 表示是否有更新版本
+      console.log('小程序是否有新版本：', res.hasUpdate);
+      if (res.hasUpdate) {
+        wx.showToast({
+          title: '发现新版本',
+          icon: 'none',
+          duration: 2000
+        });
+      }
+    });
+    
+    // 监听小程序有版本更新事件，客户端主动触发下载
+    updateManager.onUpdateReady(function() {
+      wx.showModal({
+        title: '更新提示',
+        content: '新版本已经准备好，是否重启应用？',
+        success: function(res) {
+          if (res.confirm) {
+            // 新的版本已经下载好，调用 applyUpdate 应用新版本并重启
+            updateManager.applyUpdate();
+          }
+        }
+      });
+    });
+    
+    // 监听小程序更新失败事件
+    updateManager.onUpdateFailed(function() {
+      wx.showModal({
+        title: '更新提示',
+        content: '新版本下载失败，请检查网络后重试',
+        showCancel: false
+      });
     });
   },
 

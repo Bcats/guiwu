@@ -35,10 +35,10 @@ Page({
     // 排序多列选择器选项
     sortOptions: [
       ['默认排序', '价格', '使用天数', '购买时间', '日均成本', '次均成本'],
-      ['升序', '降序']
+      ['降序', '升序']
     ],
     // 当前选中的排序索引 [字段索引, 方式索引]
-    sortIndex: [0, 1],
+    sortIndex: [0, 0],
     // 当前选中的排序名称组合
     sortName: '默认排序',
     // 搜索关键词
@@ -409,6 +409,8 @@ Page({
     const index = e.detail.value;
     const status = this.data.statusOptions[index];
     
+    console.log('状态筛选变更:', status, '索引:', index);
+    
     this.setData({
       selectedStatus: status,
       statusIndex: index
@@ -451,6 +453,8 @@ Page({
    */
   filterAssets() {
     const { assets, selectedCategory, selectedStatus, searchKeyword, costMode } = this.data;
+    console.log('筛选条件 - 状态:', selectedStatus);
+    
     // 筛选条件
     const filteredAssets = assets.filter(item => {
       // 分类筛选
@@ -459,9 +463,14 @@ Page({
       }
       
       // 状态筛选
-      if (selectedStatus === '使用中' && item.status !== 1) {
+      if (selectedStatus === '使用中' && item.status !== '使用中') {
+        console.log('筛选掉非使用中资产:', item.name, '状态:', item.status);
         return false;
-      } else if (selectedStatus === '停用' && item.status !== 0) {
+      } else if (selectedStatus === '停用' && item.status !== '停用') {
+        console.log('筛选掉非停用资产:', item.name, '状态:', item.status);
+        return false;
+      } else if (selectedStatus !== '全部状态' && selectedStatus !== '使用中' && selectedStatus !== '停用' && item.status !== selectedStatus) {
+        console.log('筛选掉其他状态资产:', item.name, '状态:', item.status, '期望状态:', selectedStatus);
         return false;
       }
       

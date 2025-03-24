@@ -134,6 +134,7 @@
   border-radius: 32rpx;
   overflow: hidden;
   margin-bottom: 30rpx;
+  margin-top: 0;
   box-shadow: 0 20rpx 50rpx rgba(0, 0, 0, 0.05);
 }
 
@@ -150,9 +151,9 @@
   border-bottom: none;
 }
 
-.function-item:hover {
+/* .function-item:hover {
   background-color: #f9f9f9;
-}
+} */
 
 .function-icon {
   width: 80rpx;
