@@ -5,7 +5,7 @@
     <view class="app-logo">
       <image src="../../static/icons/app-icon.jpg"></image>
     </view>
-    <view class="app-name">归物盒子</view>
+    <view class="app-name">物记盒子</view>
     <view class="app-version">版本 {{version}}</view>
     <view class="app-update">更新日期：{{updateTime}}</view>
   </view>
@@ -49,6 +49,6 @@
   
   <!-- 版权信息 -->
   <view class="copyright">
-    <text>© 2025 归物盒子团队 版权所有</text>
+    <text>© 2025 物记盒子团队 版权所有</text>
   </view>
 </view> 

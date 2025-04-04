@@ -1,6 +1,8 @@
 {
-  "navigationBarTitleText": "归物盒子",
+  "navigationBarTitleText": "物记盒子",
   "enablePullDownRefresh": true,
-  "usingComponents": {},
+  "usingComponents": {
+    "password-dialog": "/components/password-dialog/password-dialog"
+  },
   "backgroundTextStyle": "dark"
 } 

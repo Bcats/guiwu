@@ -1,5 +1,5 @@
 /**
- * 归物盒子小程序图标库 - 基于FontAwesome精简版
+ * 物记盒子小程序图标库 - 基于FontAwesome精简版
  */
 
 @font-face {
@@ -397,4 +397,10 @@
 .fa-ice-cream:before { content: "\f810"; }
 .fa-cookie:before { content: "\f563"; }
 .fa-pepper-hot:before { content: "\f816"; }
-.fa-pizza-slice:before { content: "\f818"; } 
+.fa-pizza-slice:before { content: "\f818"; }
+
+/* 添加数据库图标 */
+.fa-database:before { content: "\f1c0"; }
+
+/* 添加下载图标 */
+.fa-download:before { content: "\f019"; } 

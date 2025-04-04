@@ -17,7 +17,6 @@ Page({
       totalValue: 0
     },
     theme: 'light',
-    showClearConfirm: false,
     loading: true,
     isLoggedIn: false
   },
@@ -159,71 +158,11 @@ Page({
     });
   },
 
-  // 显示清除数据确认框
-  showClearDataConfirm: function() {
-    this.setData({
-      showClearConfirm: true
+  // 跳转到数据管理页面
+  goToDataManage: function() {
+    wx.navigateTo({
+      url: '/pages/data-manage/data-manage'
     });
-  },
-  
-  // 隐藏清除数据确认框
-  hideClearDataConfirm: function() {
-    this.setData({
-      showClearConfirm: false
-    });
-  },
-  
-  // 阻止点击穿透
-  preventTap: function(e) {
-    // 阻止事件冒泡
-    return;
-  },
-  
-  // 清除所有数据
-  clearAllData: function() {
-    wx.showLoading({
-      title: '正在清除...'
-    });
-    
-    // 清除资产数据
-    wx.removeStorageSync('assets');
-    
-    // 更新状态
-    this.setData({
-      showClearConfirm: false,
-      assetStats: {
-        count: 0,
-        totalValue: 0
-      }
-    });
-    
-    setTimeout(() => {
-      wx.hideLoading();
-      wx.showToast({
-        title: '数据已清除',
-        icon: 'success'
-      });
-      
-      // 刷新首页资产
-      setTimeout(() => {
-        wx.switchTab({
-          url: '/pages/index/index',
-          success: () => {
-            // 获取首页实例并刷新数据
-            const pages = getCurrentPages();
-            const indexPage = pages.find(page => page.route === 'pages/index/index');
-            if (indexPage && typeof indexPage.onPullDownRefresh === 'function') {
-              indexPage.onPullDownRefresh();
-            }
-            
-            // 或者通过事件广播通知首页刷新
-            if (app.globalData) {
-              app.globalData.needRefresh = true;
-            }
-          }
-        });
-      }, 1000);
-    }, 800);
   },
 
   goToTheme: function () {
@@ -251,12 +190,6 @@ Page({
     });
   },
 
-  goToAddAsset: function () {
-    wx.navigateTo({
-      url: '/pages/add/add'
-    });
-  },
-
   onPullDownRefresh: function () {
     this.loadData();
     wx.stopPullDownRefresh();
@@ -264,7 +197,7 @@ Page({
 
   onShareAppMessage: function () {
     return {
-      title: '归物盒子 - 让资产管理更简单高效',
+      title: '物记盒子 - 让资产管理更简单高效',
       path: '/pages/index/index',
       imageUrl: '/static/images/share-cover.png',
       success: function(res) {
@@ -285,4 +218,4 @@ Page({
       }
     };
   }
-}) 
+}); 

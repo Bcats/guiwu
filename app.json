@@ -6,12 +6,13 @@
     "pages/personal/personal",
     "pages/theme/theme",
     "pages/about/about",
-    "pages/card/card"
+    "pages/card/card",
+    "pages/data-manage/data-manage"
   ],
   "window": {
     "backgroundTextStyle": "dark",
     "navigationBarBackgroundColor": "#2C7EF8",
-    "navigationBarTitleText": "归物盒子",
+    "navigationBarTitleText": "物记盒子",
     "navigationBarTextStyle": "white",
     "enablePullDownRefresh": true
   },

@@ -48,6 +48,18 @@
         </view>
         <text class="fa fa-chevron-right function-arrow"></text>
       </view> -->
+
+      <!-- 数据管理 -->
+      <view class="function-item" bindtap="goToDataManage">
+        <view class="function-icon icon-data-manage">
+          <text class="fa fa-database"></text>
+        </view>
+        <view class="function-info">
+          <view class="function-title">数据管理</view>
+          <view class="function-desc">导入、导出和清除数据</view>
+        </view>
+        <text class="fa fa-chevron-right function-arrow"></text>
+      </view>
       
       <!-- 分享小程序 -->
       <button class="share-button function-item" open-type="share">
@@ -85,25 +97,13 @@
         <text class="fa fa-chevron-right function-arrow"></text>
       </button>
 
-      <!-- 清除数据-->
-      <view class="function-item" bindtap="showClearDataConfirm">
-        <view class="function-icon icon-clear">
-          <text class="fa fa-trash-alt"></text>
-        </view>
-        <view class="function-info">
-          <view class="function-title">清除数据</view>
-          <view class="function-desc">清除所有本地存储的资产数据</view>
-        </view>
-        <text class="fa fa-chevron-right function-arrow"></text>
-      </view>
-
       <!-- 关于应用 -->
       <view class="function-item" bindtap="goToAbout">
         <view class="function-icon icon-about">
           <text class="fa fa-info-circle"></text>
         </view>
         <view class="function-info">
-          <view class="function-title">关于归物盒子</view>
+          <view class="function-title">关于物记盒子</view>
           <view class="function-desc">了解应用的更多信息</view>
         </view>
         <text class="fa fa-chevron-right function-arrow"></text>
@@ -125,8 +125,8 @@
 
     <!-- 版本信息 -->
     <view class="version-info">
-      <view class="version-text">归物盒子 v1.0.1</view>
-      <view class="copyright-text">© 2025 归物盒子应用</view>
+      <view class="version-text">物记盒子 v1.0.1</view>
+      <view class="copyright-text">© 2025 物记盒子应用</view>
     </view>
   </block>
   
