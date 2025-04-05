@@ -42,7 +42,7 @@ App({
       // 获取小程序版本信息
       const accountInfo = wx.getAccountInfoSync ? wx.getAccountInfoSync() : {};
       const version = (accountInfo.miniProgram && accountInfo.miniProgram.version) || '1.0.0';
-      
+      console.log('当前版本信息:', accountInfo);
       // 获取当前日期作为更新时间
       const now = new Date();
       const year = now.getFullYear();

@@ -125,7 +125,7 @@
 
     <!-- 版本信息 -->
     <view class="version-info">
-      <view class="version-text">物记盒子 v1.0.1</view>
+      <view class="version-text">物记盒子 v{{ version }}</view>
       <view class="copyright-text">© 2025 物记盒子应用</view>
     </view>
   </block>

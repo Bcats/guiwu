@@ -35,26 +35,13 @@ Page({
   // 获取版本信息
   getVersionInfo: function () {
     // 优先从全局获取版本信息
-    // if (app.globalData.versionInfo && app.globalData.versionInfo.version) {
-    //   console.log('globalData.versionInfo', app.globalData.versionInfo);
-    //   this.setData({
-    //     version: app.globalData.versionInfo.version,
-    //     updateTime: app.globalData.versionInfo.updateTime
-    //   });
-    //   return;
-    // }
-
-    // 如果全局没有，则尝试获取
-    try {
-      const versionInfo = app.getVersionInfo();
-      console.log('versionInfo', versionInfo);
+    if (app.globalData.versionInfo && app.globalData.versionInfo.version) {
+      console.log('globalData.versionInfo', app.globalData.versionInfo);
       this.setData({
-        version: versionInfo.version,
-        updateTime: versionInfo.updateTime
+        version: app.globalData.versionInfo.version,
+        updateTime: app.globalData.versionInfo.updateTime
       });
-    } catch (e) {
-      console.error('获取版本信息失败:', e);
-      // 使用默认值
+      return;
     }
   },
 

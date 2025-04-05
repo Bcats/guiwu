@@ -18,10 +18,13 @@ Page({
     },
     theme: 'light',
     loading: true,
-    isLoggedIn: false
+    isLoggedIn: false,
+    version: '1.0.0',
+    updateTime: '2025-03-22',
   },
 
   onLoad: function () {
+    this.getVersionInfo();
     this.setData({
       theme: app.getTheme()
     });
@@ -217,5 +220,18 @@ Page({
         });
       }
     };
+  },
+
+  // 获取版本信息
+  getVersionInfo: function () {
+    // 优先从全局获取版本信息
+    if (app.globalData.versionInfo && app.globalData.versionInfo.version) {
+      console.log('globalData.versionInfo', app.globalData.versionInfo);
+      this.setData({
+        version: app.globalData.versionInfo.version,
+        updateTime: app.globalData.versionInfo.updateTime
+      });
+      return;
+    }
   }
 }); 

@@ -7,7 +7,7 @@
     </view>
     <view class="app-name">物记盒子</view>
     <view class="app-version">版本 {{version}}</view>
-    <view class="app-update">更新日期：{{updateTime}}</view>
+    <!-- <view class="app-update">更新日期：{{updateTime}}</view> -->
   </view>
   
   <!-- 功能列表 -->
