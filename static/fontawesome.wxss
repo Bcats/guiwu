@@ -4,7 +4,7 @@
 
 @font-face {
   font-family: 'FontAwesome';
-  src: url('https://7072-prod-6gf76b0x5268e2e8-1350385896.tcb.qcloud.la/web/static/font/fa-solid-900.woff2?sign=e2cafd41a1e776e4cb2e17ca47173c16&t=1742800886') format('woff2');
+  src: url('https://fontawesome.dashgame.com/assets/font-awesome/fonts/fontawesome-webfont.woff2?v=4.7.0') format('woff2');
   font-weight: normal;
   font-style: normal;
 }
@@ -403,4 +403,10 @@
 .fa-database:before { content: "\f1c0"; }
 
 /* 添加下载图标 */
-.fa-download:before { content: "\f019"; } 
+.fa-download:before { content: "\f019"; }
+
+/* 微信图标 */
+.fa-wechat:before,
+.fa-weixin:before {
+  content: "\f1d7";
+} 

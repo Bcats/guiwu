@@ -9,8 +9,8 @@ Page({
     app: getApp(),
     userInfo: {
       avatarUrl: '/static/images/default-avatar.png',
-      nickName: '未登录',
-      userId: ''
+      nickName: '游客',
+      userId: 'guest'
     },
     assetStats: {
       count: 0,
@@ -21,6 +21,12 @@ Page({
     isLoggedIn: false,
     version: '1.0.0',
     updateTime: '2025-03-22',
+    showProfileDialog: false,
+    wxUserInfo: null,
+    useDays: 0,  // 使用天数
+    menuList: [
+      // 菜单列表...
+    ]
   },
 
   onLoad: function () {
@@ -29,8 +35,18 @@ Page({
       theme: app.getTheme()
     });
     
+    // 检查并设置首次使用日期
+    let firstUseDate = wx.getStorageSync('firstUseDate');
+    if (!firstUseDate) {
+      const now = new Date();
+      firstUseDate = now.toISOString();
+      wx.setStorageSync('firstUseDate', firstUseDate);
+      console.log('首次使用日期已设置:', firstUseDate);
+    }
+    
     this.checkLoginStatus();
     this.loadData();
+    this.calculateUseDays(); // 计算使用天数
   },
 
   onShow: function () {
@@ -38,11 +54,35 @@ Page({
     
     this.checkLoginStatus();
     this.loadData();
+    this.calculateUseDays(); // 计算使用天数
     
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
       this.getTabBar().setData({
         selected: 2
       });
+    }
+  },
+
+  // 计算使用天数
+  calculateUseDays: function() {
+    // 从存储中获取首次使用日期
+    const firstUseDate = wx.getStorageSync('firstUseDate');
+    if (firstUseDate) {
+      const firstDate = new Date(firstUseDate);
+      const today = new Date();
+      const diffTime = Math.abs(today - firstDate);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+      // 首次使用当天算第1天
+      this.setData({
+        useDays: Math.max(1, diffDays)
+      });
+      console.log('使用天数计算结果:', this.data.useDays);
+    } else {
+      // 如果没有首次使用日期，设置为1天
+      this.setData({
+        useDays: 1
+      });
+      console.log('未找到首次使用日期，默认使用天数设为1');
     }
   },
 
@@ -83,48 +123,167 @@ Page({
     });
   },
 
-  // 获取用户信息
-  getUserProfile: function() {
-    // 如果已登录，则不再获取
+  /**
+   * 登录获取用户信息
+   */
+  getUserProfile() {
+    console.log('用户点击头像，尝试获取信息');
+    
     if (this.data.isLoggedIn) {
+      console.log('用户已登录，显示编辑资料对话框');
+      // 对已登录用户，将当前用户信息传递给对话框组件
+      this.setData({
+        wxUserInfo: {
+          avatarUrl: this.data.userInfo.avatarUrl,
+          nickName: this.data.userInfo.nickName,
+          userId: this.data.userInfo.userId
+        },
+        showProfileDialog: true
+      });
       return;
     }
-    
+
+    wx.showLoading({
+      title: '获取信息中',
+    });
+
+    console.log('调用wx.getUserProfile API');
     wx.getUserProfile({
-      desc: '用于完善会员资料', // 声明获取用户个人信息后的用途
+      desc: '用于完善会员资料',
       success: (res) => {
-        console.log("获取用户信息成功", res);
-        const userInfo = res.userInfo;
+        console.log('获取用户信息成功:', res);
+        wx.hideLoading();
         
         // 生成随机用户ID
-        const randomSuffix = Math.floor(Math.random() * 9000) + 1000;
-        const userId = `user_${randomSuffix}`;
+        const userId = 'user_' + Math.random().toString(36).substr(2, 9);
         
-        // 补充用户ID
+        // 将用户信息保存到data
+        const userInfo = res.userInfo;
         userInfo.userId = userId;
         
-        // 保存用户信息
-        wx.setStorageSync('userInfo', userInfo);
-        app.updateUserInfo && app.updateUserInfo(userInfo);
-        
         this.setData({
-          userInfo: userInfo,
-          isLoggedIn: true
-        });
-        
-        wx.showToast({
-          title: '登录成功',
-          icon: 'success'
+          wxUserInfo: userInfo,
+          showProfileDialog: true
         });
       },
       fail: (err) => {
-        console.error("获取用户信息失败", err);
-        wx.showToast({
-          title: '登录失败',
-          icon: 'none'
-        });
+        console.error('获取用户信息失败:', err);
+        wx.hideLoading();
+        
+        // 根据错误类型显示不同提示
+        if (err.errMsg.indexOf('auth deny') > -1 || err.errMsg.indexOf('auth denied') > -1) {
+          wx.showToast({
+            title: '您已拒绝授权',
+            icon: 'none'
+          });
+        } else if (err.errMsg.indexOf('cancel') > -1) {
+          wx.showToast({
+            title: '您已取消登录',
+            icon: 'none'
+          });
+        } else {
+          wx.showToast({
+            title: '登录失败，请重试',
+            icon: 'none'
+          });
+        }
       }
     });
+  },
+
+  /**
+   * 用户确认个人资料设置
+   */
+  onProfileConfirm(e) {
+    console.log('用户确认个人资料:', e.detail);
+    const { userInfo } = e.detail;
+    
+    // 隐藏对话框
+    this.setData({
+      showProfileDialog: false
+    });
+    
+    // 如果不是已登录状态，这是首次登录
+    if (!this.data.isLoggedIn) {
+      // 处理头像上传（如果用户选择了新头像）
+      if (userInfo.avatarChanged && userInfo.customAvatarUrl) {
+        this.uploadUserAvatar(userInfo.customAvatarUrl);
+      }
+      
+      // 首次登录，设置注册日期（保留此逻辑用于其他用途）
+      const now = new Date();
+      
+      // 设置用户信息并登录
+      this.setData({
+        userInfo: {
+          avatarUrl: userInfo.avatarUrl,
+          nickName: userInfo.nickname,
+          userId: this.data.wxUserInfo.userId || 'user_' + Math.random().toString(36).substr(2, 9),
+          registerDate: now.toISOString() // 记录注册日期（保留）
+        },
+        isLoggedIn: true
+      });
+      
+      // 保存用户信息到本地存储
+      wx.setStorageSync('userInfo', this.data.userInfo);
+      wx.setStorageSync('isLoggedIn', true);
+      
+      // 计算使用天数（不再依赖registerDate）
+      this.calculateUseDays();
+      
+      wx.showToast({
+        title: '登录成功',
+        icon: 'success'
+      });
+    } else {
+      // 已登录状态，更新用户信息
+      // 处理头像上传（如果用户选择了新头像）
+      if (userInfo.avatarChanged && userInfo.customAvatarUrl) {
+        this.uploadUserAvatar(userInfo.customAvatarUrl);
+      }
+      
+      // 更新用户信息，保留注册日期
+      this.setData({
+        'userInfo.avatarUrl': userInfo.avatarUrl,
+        'userInfo.nickName': userInfo.nickname
+      });
+      
+      // 保存更新后的用户信息到本地存储
+      wx.setStorageSync('userInfo', this.data.userInfo);
+      
+      wx.showToast({
+        title: '资料已更新',
+        icon: 'success'
+      });
+    }
+  },
+
+  /**
+   * 用户取消个人资料设置
+   */
+  onProfileCancel() {
+    console.log('用户取消个人资料设置');
+    this.setData({
+      showProfileDialog: false
+    });
+    
+    // 如果是首次登录(还未登录)，显示提示
+    if (!this.data.isLoggedIn) {
+      wx.showToast({
+        title: '您已取消登录',
+        icon: 'none'
+      });
+    }
+  },
+
+  /**
+   * 上传用户头像
+   */
+  uploadUserAvatar(tempFilePath) {
+    console.log('准备上传头像:', tempFilePath);
+    // TODO: 这里可以实现上传头像到服务器的逻辑
+    // 为了简化，这里仅做本地处理
+    console.log('头像已保存到本地');
   },
 
   // 用户登出
@@ -150,6 +309,7 @@ Page({
           this.setData({
             userInfo: defaultUserInfo,
             isLoggedIn: false
+            // 移除 useDays: 0，保持使用天数不变
           });
           
           wx.showToast({

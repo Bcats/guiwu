@@ -87,11 +87,18 @@
 .user-nickname {
   font-size: 40rpx;
   font-weight: 600;
+  height: 40rpx;
+  line-height: 40rpx;
 }
 
 .user-id {
-  font-size: 28rpx;
-  opacity: 0.9;
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.9);
+  margin-top: 16rpx;
+  background: rgba(0, 0, 0, 0.2);
+  display: inline-block;
+  padding: 4rpx 12rpx;
+  border-radius: 20rpx;
 }
 
 /* 卡片样式 */

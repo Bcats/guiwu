@@ -1,0 +1,47 @@
+<view class="mask" wx:if="{{show}}" catchtap="preventBubble">
+  <view class="dialog">
+    <view class="dialog-header">
+      <text class="dialog-title">更新个人信息</text>
+      <text class="dialog-subtitle">请完善您的个人资料</text>
+    </view>
+    <view class="dialog-content">
+      <!-- 头像部分 - 使用微信开放能力 -->
+      <view class="avatar-section">
+        <view class="avatar-container">
+          <button 
+            class="avatar-button" 
+            open-type="chooseAvatar" 
+            bindchooseavatar="onChooseAvatar">
+            <image class="user-avatar" src="{{avatarUrl}}" mode="aspectFill"></image>
+            <view class="avatar-edit-badge">
+              <text class="avatar-edit-text">点击更换</text>
+            </view>
+          </button>
+        </view>
+      </view>
+      
+      <!-- 昵称部分 - 使用nickname输入框 -->
+      <view class="nickname-section">
+        <view class="nickname-label">昵称</view>
+        <view class="nickname-input-container">
+          <input 
+            class="nickname-input" 
+            type="nickname"
+            value="{{nickname}}" 
+            placeholder="请输入昵称" 
+            bindinput="onNicknameInput" 
+            bindfocus="onNicknameFocus"
+            focus="{{focusNickname}}"
+          />
+          <view class="use-wx-btn" wx:if="{{wxUserInfo.nickName}}" catchtap="useWxNickname">
+          </view>
+        </view>
+      </view>
+    </view>
+    
+    <view class="dialog-footer">
+      <view class="btn cancel-btn" catchtap="onCancel">取消</view>
+      <view class="btn confirm-btn {{!nickname ? 'confirm-btn[disabled]' : ''}}" catchtap="onConfirm" disabled="{{!nickname}}">确定</view>
+    </view>
+  </view>
+</view> 
