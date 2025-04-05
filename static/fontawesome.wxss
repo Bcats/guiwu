@@ -37,6 +37,16 @@
   content: "\f067";
 }
 
+/* 眼睛图标 - 显示数据 */
+.fa-eye:before {
+  content: "\f06e";
+}
+
+/* 眼睛图标 - 隐藏数据 */
+.fa-eye-slash:before {
+  content: "\f070";
+}
+
 /* 返回图标 */
 .fa-chevron-left:before {
   content: "\f053";

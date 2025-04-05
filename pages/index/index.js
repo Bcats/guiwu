@@ -16,10 +16,14 @@ Page({
     dailyAverage: 0,
     // 次均成本
     usageAverage: 0,
+    // 二手估值（默认为资产总价值的60%）
+    secondHandValue: 0,
     // 成本显示模式: 'daily'(日均) 或 'usage'(次均)
     costMode: 'daily', 
     // 当前显示的成本值
     currentAverage: 0,
+    // 是否隐藏敏感数据
+    hideData: false,
     // 分类列表
     categories: [],
     // 当前选中的分类
@@ -57,6 +61,12 @@ Page({
     showSlideOptions: false,
     // 当前滑动显示选项的资产ID
     currentSlideAssetId: null,
+    // 当前滑动进度（0-1范围，用于控制动画）
+    slideProgress: 0,
+    // 最大滑动距离（单位rpx）
+    maxSlideDistance: 360,
+    // 是否启用滑动动画
+    slideAnimating: false,
     // 浮动按钮位置
     btnPosition: {
       x: 40,
@@ -96,6 +106,13 @@ Page({
     // 初始化触控变量
     this.touchStartX = 0;
     this.touchEndX = 0;
+    this.touchStartTime = 0;
+    this.isTouchMove = false;
+    this.totalMoveDistance = 0;
+    this.slideDirection = null;
+    // 初始化右滑最大距离，与最大滑动距离相同
+    this.maxRightSwipeDistance = this.data.maxSlideDistance;
+    this.lastUpdateTime = 0;
     
     // 默认设置
     this.setData({
@@ -232,6 +249,7 @@ Page({
           dailyAverage: '0.00',
           usageAverage: '0.00',
           currentAverage: '0.00',
+          secondHandValue: '0.00',
           loading: false
         });
         return;
@@ -283,6 +301,9 @@ Page({
         Number(overview.dailyAverage).toFixed(2) : 
         Number(overview.usageAverage).toFixed(2);
       
+      // 计算二手估值（默认为总资产价值的60%）
+      // const secondHandValue = (Number(overview.totalValue) * 0.6).toFixed(2);
+      
       this.setData({
         assets: formattedAssets,
         filteredAssets: formattedAssets,
@@ -298,6 +319,7 @@ Page({
         dailyAverage: Number(overview.dailyAverage).toFixed(2),
         usageAverage: Number(overview.usageAverage).toFixed(2),
         currentAverage: currentAverage,
+        // secondHandValue: secondHandValue,
         loading: false
       });
       
@@ -549,6 +571,9 @@ Page({
     // 根据当前显示模式选择要显示的值
     const currentAverage = costMode === 'daily' ? dailyAverage : usageAverage;
     
+    // 计算二手估值（资产总价值的60%）
+    const secondHandValue = (Number(totalValue) * 0.6).toFixed(2);
+    
     this.setData({
       filteredAssets: sortedAssets,
       // 资产总数
@@ -560,6 +585,8 @@ Page({
       usageAverage: usageAverage,
       // 更新当前显示的成本值
       currentAverage: currentAverage,
+      // 更新二手估值
+      secondHandValue: secondHandValue,
       // 空状态提示文案
       emptyText: '还没有添加任何资产'
     });
@@ -567,11 +594,20 @@ Page({
   
   // 处理资产卡片的触摸事件
   onAssetTouchStart: function(e) {
+    // 获取当前触摸的资产ID
+    const assetId = e.currentTarget.dataset.id;
+    
+    // 记录起始触摸位置和时间
     this.touchStartX = e.touches[0].pageX;
     this.touchStartY = e.touches[0].pageY;
     this.touchStartTime = Date.now();
     this.isTouchMove = false;
     this.totalMoveDistance = 0;
+    
+    // 关闭滑动动画，确保跟手感
+    this.setData({
+      slideAnimating: false
+    });
   },
   
   onAssetTouchMove: function(e) {
@@ -583,41 +619,204 @@ Page({
     const deltaY = moveY - this.touchStartY;
     
     // 计算总移动距离
-    this.totalMoveDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    this.totalMoveDistance = Math.abs(deltaX);
     
     // 如果Y方向移动大于X方向，不处理左右滑动，让页面自然滚动
     if (Math.abs(deltaY) > Math.abs(deltaX)) {
-      this.isTouchMove = true;
       return;
     }
     
-    // 只有在水平滑动时才阻止事件冒泡
-    if (Math.abs(deltaX) > 10) {
+    // 节流处理：限制UI更新频率，提高性能
+    const now = Date.now();
+    if (this.lastUpdateTime && now - this.lastUpdateTime < 16) { // 约60fps
+      return;
+    }
+    this.lastUpdateTime = now;
+    
+    // 降低滑动触发阈值，提高灵敏度
+    if (Math.abs(deltaX) > 2) { // 更低的阈值，更灵敏
       this.isTouchMove = true;
       
       // 获取当前触摸的资产ID
       const assetId = e.currentTarget.dataset.id;
       
-      // 向左滑动显示操作按钮，向右滑动隐藏
-      if (deltaX < -50) {
-        this.setData({
-          currentSlideAssetId: assetId
-        });
-      } else if (deltaX > 20) {
-        this.setData({
-          currentSlideAssetId: null
-        });
+      // 计算滑动进度
+      let progress = 0;
+      
+      // 计算门槛值
+      const threshold = this.data.maxSlideDistance * 0.4;
+      
+      // 向左滑动时，deltaX为负值，打开操作按钮
+      if (deltaX < 0) {
+        // 只有当没有其他卡片展开或者正在操作当前卡片时，才允许左滑
+        if (!this.data.currentSlideAssetId || this.data.currentSlideAssetId === assetId) {
+          // 计算左滑进度，范围0-1
+          progress = Math.min(1, Math.abs(deltaX) / threshold);
+          this.slideDirection = 'left';
+        } else {
+          // 如果其他卡片已经展开，不处理
+          return;
+        }
+      } 
+      // 向右滑动时，deltaX为正值
+      else if (deltaX > 0) {
+        // 只有当前卡片已经处于左滑状态时才处理右滑
+        if (this.data.currentSlideAssetId === assetId && this.data.slideProgress > 0) {
+          // 简单对称：用当前进度减去右滑带来的进度变化
+          // 将右滑距离等比例转换为进度减少量
+          const progressDecrement = Math.min(1, deltaX / threshold);
+          // 当前进度减去右滑进度，最小为0
+          progress = Math.max(0, this.data.slideProgress - progressDecrement);
+          
+          this.slideDirection = 'right';
+        } else {
+          return; // 如果卡片未处于左滑状态，不处理右滑
+        }
       }
+      
+      // 随着进度变化调整视觉效果
+      const rightCornerRadius = progress > 0.8 ? 8 : Math.max(8, 32 - progress * 32);
+      
+      // 更新滑动状态
+      this.setData({
+        slideAnimating: false, // 触摸移动时禁用动画，保证跟手感
+        currentSlideAssetId: assetId,
+        slideProgress: progress,
+        rightCornerRadius: rightCornerRadius
+      });
     }
   },
   
   onAssetTouchEnd: function(e) {
-    const touchEndTime = Date.now();
-    const touchDuration = touchEndTime - this.touchStartTime;
+    if (!this.isTouchMove) {
+      return;
+    }
     
-    // 只有在触摸时间短且移动距离小的情况下才触发点击事件
-    if (touchDuration < 150 && !this.isTouchMove && this.totalMoveDistance < 10) {
-      // this.goToDetail(e);
+    this.isTouchMove = false;
+    
+    // 获取结束触摸时间
+    const endTime = Date.now();
+    const touchDuration = endTime - this.touchStartTime;
+    
+    // 计算平均速度（像素/毫秒）
+    const speed = this.totalMoveDistance / Math.max(touchDuration, 1);
+    
+    // 速度阈值
+    const speedThreshold = 0.15;
+    
+    const assetId = e.currentTarget.dataset.id;
+    const slideDirection = this.slideDirection || 'none';
+    
+    // 启用动画，使后续变化平滑
+    this.setData({
+      slideAnimating: true
+    });
+    
+    // 进度阈值
+    const progressThreshold = 0.2;
+    
+    // 根据滑动方向和进度决定最终状态
+    if (slideDirection === 'left') {
+      // 左滑：进度大或速度快则完全展开，否则恢复原位
+      if (this.data.slideProgress > progressThreshold || speed > speedThreshold) {
+        this.setData({
+          slideProgress: 1,
+          rightCornerRadius: 8
+        });
+      } else {
+        this.restoreCardPosition(assetId);
+      }
+    } else if (slideDirection === 'right') {
+      // 右滑：进度小或速度快则完全恢复，否则保持原位
+      if (this.data.slideProgress < (1 - progressThreshold) || speed > speedThreshold) {
+        this.restoreCardPosition(assetId);
+      } else {
+        // 保持展开状态
+        this.setData({
+          slideProgress: 1,
+          rightCornerRadius: 8
+        });
+      }
+    } else {
+      // 无明确方向，根据当前进度决定
+      if (this.data.slideProgress > 0.5) {
+        this.setData({
+          slideProgress: 1,
+          rightCornerRadius: 8
+        });
+      } else {
+        this.restoreCardPosition(assetId);
+      }
+    }
+    
+    // 清除滑动方向
+    this.slideDirection = null;
+  },
+  
+  // 恢复卡片位置的辅助函数
+  restoreCardPosition: function(assetId) {
+    // 启用动画，设为0进度
+    this.setData({
+      slideAnimating: true,
+      slideProgress: 0,
+      rightCornerRadius: 32
+    });
+    
+    // 立即重置当前滑动资产ID，不等待动画完成
+    this.setData({
+      currentSlideAssetId: null
+    });
+    
+    // 仍然保留计时器以确保动画完成后UI状态一致
+    setTimeout(() => {
+      // 额外的安全检查，确保进度确实为0
+      if (this.data.slideProgress !== 0) {
+        this.setData({
+          slideProgress: 0
+        });
+      }
+    }, 300);
+  },
+  
+  // 关闭所有滑动选项
+  closeAllSlideOptions: function() {
+    // 如果没有打开的卡片，直接返回
+    if (!this.data.currentSlideAssetId) {
+      return;
+    }
+    
+    // 保存当前滑动卡片ID，以便后续清理
+    const slidingCardId = this.data.currentSlideAssetId;
+    
+    // 启用动画，设为0进度
+    this.setData({
+      slideAnimating: true,
+      slideProgress: 0,
+      rightCornerRadius: 32
+    });
+    
+    // 立即重置当前滑动状态，不等待动画完成
+    // 这样可以确保在showAssetDetail中点击其他卡片时能正确显示详情
+    this.setData({
+      currentSlideAssetId: null
+    });
+    
+    // 仍然保留计时器以确保动画完成后UI状态一致
+    setTimeout(() => {
+      // 额外的安全检查，确保进度确实为0
+      if (this.data.slideProgress !== 0) {
+        this.setData({
+          slideProgress: 0
+        });
+      }
+    }, 300);
+  },
+  
+  // 单击页面空白区域时关闭所有滑动选项
+  onPageTap: function() {
+    // 当点击页面空白区域时，关闭所有展开的滑动选项
+    if (this.data.currentSlideAssetId) {
+      this.closeAllSlideOptions();
     }
   },
   
@@ -731,66 +930,36 @@ Page({
   
   // 显示资产详情
   showAssetDetail: function(e) {
-    const id = e.currentTarget.dataset.id;
-    const asset = assetManager.getAssetById(id);
+    const assetId = e.currentTarget.dataset.id;
+    const assetIndex = this.data.filteredAssets.findIndex(item => item.id === assetId);
     
-    if (asset) {
-      // 格式化一些数据，例如类别的小写形式用于样式
-      const categoryLower = asset.category ? asset.category.toLowerCase() : 'other';
-      const iconColor = asset.iconColor || 'blue';
-
-      // 判断是否过保
-      let isExpired = false;
-      if (asset.warrantyDate) {
-        const warrantyDate = new Date(asset.warrantyDate);
-        const today = new Date();
-        isExpired = today > warrantyDate;
-      }
-      
-      // 计算使用天数和日均成本
-      let usageDays = 0;
-      let dailyCost = 0;
-      
-      if (asset.purchaseDate) {
-        const purchaseDate = new Date(asset.purchaseDate);
-        const today = new Date();
-        const diffTime = Math.abs(today - purchaseDate);
-        usageDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
-        if (usageDays > 0 && asset.price) {
-          dailyCost = (asset.price / usageDays).toFixed(2);
-        }
-      }
-      
-      // 计算次均成本
-      let usageCost = 0;
-      if (asset.price) {
-        const usageCount = parseInt(asset.usageCount || 1);
-        usageCost = (asset.price / Math.max(1, usageCount)).toFixed(2);
-      }
-      
-      // 确保资产有状态值
-      const status = asset.status || '使用中';
-      
-      this.setData({
-        detailAsset: {
-          ...asset,
-          status: status, // 确保详情中也显示正确的状态
-          categoryLower,
-          iconColor,
-          isExpired,
-          usageDays: usageDays || 0,
-          dailyCost: dailyCost || 0,
-          usageCost: usageCost || 0
-        },
-        showDetailPopup: true
-      });
-    } else {
-      wx.showToast({
-        title: '获取资产信息失败',
-        icon: 'none'
-      });
+    if (assetIndex === -1) {
+      return;
     }
+    
+    // 判断点击的是否是当前正在滑动的卡片
+    const isSlidingCard = this.data.currentSlideAssetId === assetId;
+    
+    // 如果有任何卡片处于滑动状态
+    if (this.data.currentSlideAssetId) {
+      // 关闭所有滑动选项
+      this.closeAllSlideOptions();
+      
+      // 如果点击的不是当前滑动的卡片，不显示详情，仅关闭滑动选项
+      if (!isSlidingCard) {
+        return;
+      }
+      
+      // 如果点击的是当前滑动的卡片，已经在closeAllSlideOptions中关闭了滑动选项
+      // 阻止显示详情
+      return;
+    }
+    
+    // 如果没有卡片处于滑动状态，显示详情
+    this.setData({
+      detailAsset: this.data.filteredAssets[assetIndex],
+      showDetailPopup: true
+    });
   },
   
   // 关闭资产详情弹出层
@@ -1140,5 +1309,14 @@ Page({
       searchKeyword: ''
     });
     this.filterAssets();
+  },
+
+  /**
+   * 切换数据可见性（显示/隐藏敏感数据）
+   */
+  toggleDataVisibility: function() {
+    this.setData({
+      hideData: !this.data.hideData
+    });
   },
 }); 

@@ -22,25 +22,40 @@
     <text class="loading-text">加载中...</text>
   </view>
 
-  <view class="index-scroll-view" wx:if="{{!loading}}">
+  <view class="index-scroll-view" wx:if="{{!loading}}" catchtap="onPageTap">
     <!-- 我的资产概览 -->
     <view class="overview-card">
       <view class="overview-title">
         <text>我的资产</text>
+        <view class="visibility-btn" bindtap="toggleDataVisibility">
+          <text class="fa {{hideData ? 'fa-eye-slash' : 'fa-eye'}}"></text>
+        </view>
         <view class="cost-mode-switch" bindtap="toggleCostMode" style="margin-left: auto;">
           <text class="cost-mode-text {{costMode === 'daily' ? 'active' : ''}}">日均</text>
           <text class="cost-mode-separator">/</text>
           <text class="cost-mode-text {{costMode === 'usage' ? 'active' : ''}}">次均</text>
         </view>
       </view>
-      <view class="overview-row">
-        <view class="overview-item">
-          <view class="overview-label">总资产</view>
-          <view class="overview-value">¥{{totalValue}}</view>
+      
+      <!-- 总资产单独一行 ¥-->
+      <view class="total-asset-row">
+        <!-- <view class="total-asset-label">总资产（元）</view> -->
+        <view class="total-asset-value">{{hideData ? '****' : '¥' + totalValue}}</view>
+      </view>
+      
+      <!-- 子指标一行 -->
+      <view class="overview-sub-row">
+        <view class="overview-sub-item">
+          <view class="overview-sub-label">{{costMode === 'daily' ? '日均成本' : '次均成本'}}</view>
+          <view class="overview-sub-value">{{hideData ? '**' : '¥' + currentAverage}}</view>
         </view>
-        <view class="overview-item">
-          <view class="overview-label">{{costMode === 'daily' ? '日均成本' : '次均成本'}}</view>
-          <view class="overview-value">¥{{currentAverage}}</view>
+        <view class="overview-sub-item">
+          <view class="overview-sub-label">资产数量</view>
+          <view class="overview-sub-value">{{hideData ? '**' : totalAssets}}</view>
+        </view>
+        <view class="overview-sub-item">
+          <view class="overview-sub-label">二手估值</view>
+          <view class="overview-sub-value">{{hideData ? '**' : (secondHandValue ? '¥' + secondHandValue : '--') }}</view>
         </view>
       </view>
     </view>
@@ -106,14 +121,15 @@
         wx:for="{{filteredAssets}}" 
         wx:key="id" 
         class="asset-card-wrapper"
+        data-id="{{item.id}}" 
+        catchtap="showAssetDetail" 
+        bindtouchstart="onAssetTouchStart" 
+        catchtouchmove="onAssetTouchMove" 
+        bindtouchend="onAssetTouchEnd"
       >
         <view 
-          class="asset-card {{currentSlideAssetId === item.id ? 'asset-card-slide-left' : 'asset-card-normal'}} {{item.status === '停用' ? 'asset-card-stop' : ''}}" 
-          data-id="{{item.id}}" 
-          bind:tap="showAssetDetail"
-          bind:touchstart="onAssetTouchStart"
-          bind:touchmove="onAssetTouchMove"
-          bind:touchend="onAssetTouchEnd"
+          class="asset-card {{item.status === '停用' ? 'asset-card-stop' : ''}}" 
+          style="transform: translateX({{currentSlideAssetId === item.id ? -slideProgress * maxSlideDistance : 0}}rpx); transition: {{slideAnimating ? 'all 0.3s cubic-bezier(0.25, 0.8, 0.5, 1)' : 'none'}}; box-shadow: {{currentSlideAssetId === item.id ? '0 8rpx ' + (20 + slideProgress * 10) + 'rpx rgba(0, 0, 0, ' + (0.05 + slideProgress * 0.05) + ')' : '0 8rpx 20rpx rgba(0, 0, 0, 0.05)'}}; z-index: {{currentSlideAssetId === item.id ? 2 : 1}};"
         >
           <!-- 图标部分 -->
           <view class="asset-icon-wrapper asset-icon-{{item.categoryLower}}">
@@ -131,8 +147,9 @@
               </view>
             </view>
             <view class="asset-price">
-              <text>¥{{item.price}} · {{item.usageDays}}天 · {{item.usageCount}}次</text>
-              <text style="margin-left: auto; color: #2c7ef8; font-size: 30rpx;">¥{{costMode === 'daily' ? item.dailyCost : item.usageCost}}/{{costMode === 'daily' ? '天' : '次'}}</text>
+              <text wx:if="{{costMode === 'daily'}}">{{hideData ? '****' : '¥'+item.price+' · '+item.usageDays+'天'}}</text>
+              <text wx:else>{{hideData ? '****' : '¥'+item.price+' · '+item.usageCount+'次'}}</text>
+              <text style="margin-left: auto; color: #2c7ef8; font-size: 30rpx;">{{hideData ? '****' : '¥'+((costMode === 'daily' ? item.dailyCost : item.usageCost)+'/'+(costMode === 'daily' ? '天' : '次'))}}</text>
             </view>
           </view>
           
@@ -141,7 +158,7 @@
         </view>
 
         <!-- 左滑操作按钮 -->
-        <view class="slide-options" wx:if="{{currentSlideAssetId === item.id}}">
+        <view class="slide-options" style="opacity: {{currentSlideAssetId === item.id ? slideProgress : 0}}; filter: blur({{currentSlideAssetId === item.id ? (1-slideProgress) * 4 : 0}}rpx); transform: translateX({{currentSlideAssetId === item.id ? (1-slideProgress) * 15 : 0}}rpx); transition: {{slideAnimating ? 'all 0.3s cubic-bezier(0.25, 0.8, 0.5, 1)' : 'none'}};">
           <view class="option-top" bindtap="topAsset" data-id="{{item.id}}">
             <text class="fa fa-thumbtack"></text>
             <text>置顶</text>
