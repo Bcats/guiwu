@@ -37,7 +37,7 @@
         </view>
       </view>
       
-      <!-- 总资产单独一行 ¥-->
+      <!-- 总资产单独一行 -->
       <view class="total-asset-row">
         <!-- <view class="total-asset-label">总资产（元）</view> -->
         <view class="total-asset-value">{{hideData ? '****' : '¥' + totalValue}}</view>
@@ -214,7 +214,7 @@
               </view>
               <view class="detail-warranty-tag {{detailAsset.isExpired ? 'expired' : ''}}" wx:if="{{detailAsset.warrantyDate}}">
                 <text class="fa {{detailAsset.isExpired ? 'fa-exclamation-circle' : 'fa-shield-alt'}} tag-icon"></text>
-                <text>{{detailAsset.isExpired ? '已过保' : '保修中'}}</text>
+                <text>{{detailAsset.isExpired ? '已过期' : '保修中'}}</text>
               </view>
             </view>
           </view>
@@ -311,4 +311,4 @@
     </view>
   </view>
 
-</view> 
+</view>

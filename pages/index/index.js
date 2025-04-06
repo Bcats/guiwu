@@ -16,8 +16,8 @@ Page({
     dailyAverage: 0,
     // 次均成本
     usageAverage: 0,
-    // 二手估值（默认为资产总价值的60%）
-    secondHandValue: 0,
+    // 资产残值（暂不计算）
+    secondHandValue: null,
     // 成本显示模式: 'daily'(日均) 或 'usage'(次均)
     costMode: 'daily', 
     // 当前显示的成本值
@@ -249,7 +249,7 @@ Page({
           dailyAverage: '0.00',
           usageAverage: '0.00',
           currentAverage: '0.00',
-          secondHandValue: '0.00',
+          secondHandValue: null,
           loading: false
         });
         return;
@@ -301,7 +301,7 @@ Page({
         Number(overview.dailyAverage).toFixed(2) : 
         Number(overview.usageAverage).toFixed(2);
       
-      // 计算二手估值（默认为总资产价值的60%）
+      // 计算资产残值（默认为总资产价值的60%）
       // const secondHandValue = (Number(overview.totalValue) * 0.6).toFixed(2);
       
       this.setData({
@@ -571,8 +571,8 @@ Page({
     // 根据当前显示模式选择要显示的值
     const currentAverage = costMode === 'daily' ? dailyAverage : usageAverage;
     
-    // 计算二手估值（资产总价值的60%）
-    const secondHandValue = (Number(totalValue) * 0.6).toFixed(2);
+    // 资产残值暂不计算，设为null以显示"--"
+    const secondHandValue = null;
     
     this.setData({
       filteredAssets: sortedAssets,
@@ -585,7 +585,7 @@ Page({
       usageAverage: usageAverage,
       // 更新当前显示的成本值
       currentAverage: currentAverage,
-      // 更新二手估值
+      // 更新资产残值
       secondHandValue: secondHandValue,
       // 空状态提示文案
       emptyText: '还没有添加任何资产'
@@ -955,9 +955,23 @@ Page({
       return;
     }
     
-    // 如果没有卡片处于滑动状态，显示详情
+    // 获取资产并处理保修状态
+    const asset = this.data.filteredAssets[assetIndex];
+    
+    // 检查保修期是否过期
+    if (asset.warrantyDate) {
+      const today = new Date();
+      const warrantyDate = new Date(asset.warrantyDate.replace(/-/g, '/'));
+      
+      // 设置isExpired属性：当前日期超过保修日期即为过期
+      asset.isExpired = today > warrantyDate;
+    } else {
+      asset.isExpired = false;
+    }
+    
+    // 显示资产详情
     this.setData({
-      detailAsset: this.data.filteredAssets[assetIndex],
+      detailAsset: asset,
       showDetailPopup: true
     });
   },

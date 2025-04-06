@@ -342,8 +342,8 @@ Page({
       // 显示确认对话框
       wx.hideLoading();
       wx.showModal({
-        title: '导入确认',
-        content: `将导入${decryptedData.assets.length}条资产记录，现有数据将被覆盖，是否继续？`,
+        title: '增量导入确认',
+        content: `将导入${decryptedData.assets.length}条资产记录，相同ID的资产将被更新，新资产将被添加，是否继续？`,
         success: (res) => {
           if (res.confirm) {
             // 确认导入
@@ -380,15 +380,49 @@ Page({
   },
   
   // 确认导入数据
-  confirmImport: function(assets) {
+  confirmImport: function(importedAssets) {
     wx.showLoading({
-      title: '正在写入数据...',
+      title: '正在合并数据...',
       mask: true
     });
     
     try {
-      // 替换现有资产数据
-      wx.setStorageSync('assets', assets);
+      // 获取现有资产数据
+      const existingAssets = assetManager.getAllAssets();
+      
+      // 创建ID到现有资产的映射，用于快速查找
+      const existingAssetsMap = {};
+      existingAssets.forEach(asset => {
+        existingAssetsMap[asset.id] = asset;
+      });
+      
+      // 计数器
+      let addedCount = 0;
+      let updatedCount = 0;
+      
+      // 处理导入的资产
+      importedAssets.forEach(importedAsset => {
+        if (existingAssetsMap[importedAsset.id]) {
+          // 资产已存在，更新它
+          delete existingAssetsMap[importedAsset.id]; // 从映射中移除，稍后会重新添加合并后的资产
+          updatedCount++;
+        } else {
+          // 新资产，直接添加
+          addedCount++;
+        }
+      });
+      
+      // 构建合并后的资产列表
+      // 首先添加所有导入的资产（包括更新的和新增的）
+      const mergedAssets = [...importedAssets];
+      
+      // 然后添加所有未被更新的现有资产
+      Object.values(existingAssetsMap).forEach(asset => {
+        mergedAssets.push(asset);
+      });
+      
+      // 保存合并后的资产数据
+      wx.setStorageSync('assets', mergedAssets);
       
       wx.hideLoading();
       wx.showToast({
@@ -396,21 +430,29 @@ Page({
         icon: 'success'
       });
       
-      // 更新首页显示
-      if (app.globalData) {
-        app.globalData.needRefresh = true;
-      }
-      
-      // 延迟后返回
+      // 显示导入结果统计
       setTimeout(() => {
-        wx.navigateBack();
-      }, 1500);
+        wx.showModal({
+          title: '导入完成',
+          content: `成功合并数据：\n新增资产 ${addedCount} 条\n更新资产 ${updatedCount} 条`,
+          showCancel: false,
+          success: () => {
+            // 更新首页显示
+            if (app.globalData) {
+              app.globalData.needRefresh = true;
+            }
+            
+            // 返回上一页
+            wx.navigateBack();
+          }
+        });
+      }, 1000);
     } catch (error) {
       wx.hideLoading();
-      console.error('写入数据失败:', error);
+      console.error('合并数据失败:', error);
       wx.showModal({
         title: '导入失败',
-        content: '写入数据时发生错误',
+        content: '合并数据时发生错误',
         showCancel: false
       });
     }

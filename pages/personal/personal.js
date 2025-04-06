@@ -68,21 +68,36 @@ Page({
     // 从存储中获取首次使用日期
     const firstUseDate = wx.getStorageSync('firstUseDate');
     if (firstUseDate) {
-      const firstDate = new Date(firstUseDate);
+      // 使用ISO字符串创建日期时，确保处理正确的时区
+      // 替换连字符以修复某些环境中的日期解析问题
+      const firstDateStr = firstUseDate.replace(/-/g, '/').replace(/T/g, ' ').split('.')[0];
+      const firstDate = new Date(firstDateStr);
+      
+      // 使用当前日期时区的时间
       const today = new Date();
-      const diffTime = Math.abs(today - firstDate);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+      
+      // 计算两个日期的时间戳差值（毫秒）
+      const diffTime = Math.abs(today.getTime() - firstDate.getTime());
+      
+      // 转换为天数（1天 = 24小时 * 60分钟 * 60秒 * 1000毫秒）
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); 
+      
       // 首次使用当天算第1天
       this.setData({
-        useDays: Math.max(1, diffDays)
+        useDays: Math.max(1, diffDays + 1)
       });
-      console.log('使用天数计算结果:', this.data.useDays);
+      
+      console.log('使用天数计算结果:', this.data.useDays, '首次使用日期:', firstDateStr, '今天:', today.toLocaleString());
     } else {
       // 如果没有首次使用日期，设置为1天
       this.setData({
         useDays: 1
       });
       console.log('未找到首次使用日期，默认使用天数设为1');
+      
+      // 设置今天为首次使用日期
+      const now = new Date();
+      wx.setStorageSync('firstUseDate', now.toISOString());
     }
   },
 
