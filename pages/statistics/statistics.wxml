@@ -57,13 +57,45 @@
         
         <!-- 分类图例 -->
         <view class="category-list">
-          <view class="category-item" wx:for="{{categories}}" wx:key="name">
-            <view class="category-color" style="background-color: {{item.color}}"></view>
-            <view class="category-info">
-              <view class="category-name">{{item.name}}</view>
-              <view class="category-detail">
-                <view class="category-value">¥{{item.value}}</view>
-                <view class="category-percent">{{item.percentage}}% ({{item.count}})</view>
+          <view 
+            wx:for="{{categories}}" 
+            wx:key="name" 
+            class="category-item {{expandedCategoryIndex === index ? 'expanded' : ''}}" 
+            bindtap="toggleCategoryExpand" 
+            data-index="{{index}}"
+          >
+            <view class="category-header">
+              <view class="category-color" style="background-color: {{item.color}}"></view>
+              <view class="category-info">
+                <view class="category-name">{{item.name}}</view>
+                <view class="category-detail">
+                  <view class="category-value">¥{{item.value}}</view>
+                  <view class="category-percent">{{item.percentage}}% ({{item.count}})</view>
+                </view>
+              </view>
+              <view class="category-arrow">
+                <text class="fa {{expandedCategoryIndex === index ? 'fa-chevron-up' : 'fa-chevron-down'}}"></text>
+              </view>
+            </view>
+            
+            <!-- 展开后显示的资产列表 -->
+            <view class="category-assets" wx:if="{{expandedCategoryIndex === index}}">
+              <view 
+                class="category-asset-item" 
+                wx:for="{{categoryAssets[item.name]}}" 
+                wx:key="id" 
+                wx:for-item="asset" 
+                catchtap="goToDetail" 
+                data-id="{{asset.id}}"
+              >
+                <view class="asset-name">{{asset.name}}</view>
+                <view class="asset-info">
+                  <text>¥{{asset.price}}</text>
+                  <text class="asset-usage">{{asset.usageCount}}次</text>
+                </view>
+              </view>
+              <view class="empty-category" wx:if="{{categoryAssets[item.name].length === 0}}">
+                <text>暂无资产</text>
               </view>
             </view>
           </view>

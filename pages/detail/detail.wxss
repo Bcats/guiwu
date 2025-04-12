@@ -691,7 +691,7 @@
 .detail-top {
   display: flex;
   align-items: center;
-  margin-bottom: 40rpx;
+  margin-bottom: 30rpx;
   background-color: #fff;
   border-radius: 16rpx;
   padding: 30rpx;

@@ -38,13 +38,13 @@ Page({
     statusIndex: 0,
     // 排序多列选择器选项
     sortOptions: [
-      ['默认排序', '价格', '使用天数', '购买时间', '日均成本', '次均成本'],
+      ['价格', '使用天数', '日均成本', '次均成本'],
       ['降序', '升序']
     ],
     // 当前选中的排序索引 [字段索引, 方式索引]
-    sortIndex: [0, 0],
+    sortIndex: [1, 0],
     // 当前选中的排序名称组合
-    sortName: '默认排序',
+    sortName: '使用天数 降序',
     // 搜索关键词
     searchKeyword: '',
     // 是否显示搜索框
@@ -125,7 +125,7 @@ Page({
       searchKeyword: '',
       assets: [],
       filteredAssets: [],
-      sortName: this.getSortName([0, 1])
+      sortName: this.getSortName([1, 0])
     });
     
     // 获取系统信息设置合理的初始按钮位置
@@ -174,8 +174,38 @@ Page({
     // 检查日期是否变化，如果变化则重新加载资产以更新天数
     this.checkDateChange();
     
+    // 保存当前的筛选条件
+    const currentFilters = {
+      searchKeyword: this.data.searchKeyword,
+      selectedCategory: this.data.selectedCategory,
+      categoryIndex: this.data.categoryIndex,
+      selectedStatus: this.data.selectedStatus,
+      statusIndex: this.data.statusIndex,
+      sortIndex: this.data.sortIndex,
+      sortName: this.data.sortName
+    };
+    
     // 总是重新加载资产数据，确保最新状态
     this.loadAssets();
+    
+    // 恢复筛选条件
+    if (this.data.searchKeyword || 
+        this.data.selectedCategory !== '全部分类' || 
+        this.data.selectedStatus !== '全部状态' || 
+        (this.data.sortIndex && this.data.sortIndex[0] !== 1)) {
+      this.setData({
+        searchKeyword: currentFilters.searchKeyword,
+        selectedCategory: currentFilters.selectedCategory,
+        categoryIndex: currentFilters.categoryIndex,
+        selectedStatus: currentFilters.selectedStatus,
+        statusIndex: currentFilters.statusIndex,
+        sortIndex: currentFilters.sortIndex,
+        sortName: currentFilters.sortName
+      }, () => {
+        // 重新应用筛选
+        this.filterAssets();
+      });
+    }
     
     // 检查全局刷新标记
     if (app.globalData && app.globalData.needRefresh) {
@@ -273,8 +303,8 @@ Page({
           categoryIndex: 0,
           selectedStatus: '全部状态',
           statusIndex: 0,
-          sortIndex: [0, 1],
-          sortName: this.getSortName([0, 1]),
+          sortIndex: [1, 0],
+          sortName: this.getSortName([1, 0]),
           totalAssets: 0,
           totalValue: '0.00',
           dailyAverage: '0.00',
@@ -343,8 +373,8 @@ Page({
         categoryIndex: 0,
         selectedStatus: '全部状态',
         statusIndex: 0,
-        sortIndex: [0, 1],
-        sortName: this.getSortName([0, 1]),
+        sortIndex: [1, 0],
+        sortName: this.getSortName([1, 0]),
         totalAssets: formattedAssets.length,
         totalValue: Number(overview.totalValue).toFixed(2),
         dailyAverage: Number(overview.dailyAverage).toFixed(2),
@@ -507,15 +537,10 @@ Page({
   
   // 组合排序名称
   getSortName: function(indexArray) {
-    if (!this.data.sortOptions || !Array.isArray(this.data.sortOptions) || !indexArray) return '默认排序';
+    if (!this.data.sortOptions || !Array.isArray(this.data.sortOptions) || !indexArray) return '使用天数 降序';
     
     const fieldIndex = indexArray[0];
     const directionIndex = indexArray[1];
-    
-    // 如果是默认排序，不显示排序方式
-    if (fieldIndex === 0) {
-      return this.data.sortOptions[0][fieldIndex];
-    }
     
     // 组合字段和方式
     return this.data.sortOptions[0][fieldIndex] + ' ' + this.data.sortOptions[1][directionIndex];
@@ -592,15 +617,11 @@ Page({
             valueA = a.usageDays || 0;
             valueB = b.usageDays || 0;
             break;
-          case 3: // 购买时间
-            valueA = a.buyDate ? new Date(a.buyDate).getTime() : 0;
-            valueB = b.buyDate ? new Date(b.buyDate).getTime() : 0;
-            break;
-          case 4: // 日均成本
+          case 3: // 日均成本
             valueA = a.dailyCost || 0;
             valueB = b.dailyCost || 0;
             break;
-          case 5: // 次均成本
+          case 4: // 次均成本
             valueA = a.usageCost || 0;
             valueB = b.usageCost || 0;
             break;

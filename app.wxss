@@ -1,5 +1,15 @@
 /**app.wxss**/
 @import "/static/fontawesome.wxss";
+
+/* 添加缺失的FontAwesome图标定义 */
+.fa-chevron-down:before {
+  content: "\f078";
+}
+
+.fa-chevron-up:before {
+  content: "\f077";
+}
+
 /* 亮色主题变量 */
 page {
   --color-primary: #2C7EF8;
