@@ -1,7 +1,5 @@
 {
-  "navigationBarTitleText": "物记盒子",
   "usingComponents": {},
-  "disableScroll": false,
   "enablePullDownRefresh": true,
   "backgroundTextStyle": "dark"
-} 
+}

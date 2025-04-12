@@ -8,83 +8,156 @@
   </view>
   
   <block wx:if="{{!loading && asset}}">
+    
     <!-- 资产详情卡片 -->
-    <view class="asset-detail-card">
-      <view class="asset-detail-name">{{asset.name}}</view>
-      <view class="asset-detail-days">{{asset.usagePeriod}}</view>
-      
-      <!-- 保修指示器 -->
-      <view class="warranty-indicator" wx:if="{{asset.warrantyDate}}">
-        <block wx:for="{{6}}" wx:key="*this">
-          <view class="warranty-dot {{index < (warranty.status === 'expired' ? 0 : (warranty.status === 'expiring' ? 3 : 6)) ? '' : 'empty'}}"></view>
-        </block>
-      </view>
-      
-      <view class="purchase-date">购买时间: {{asset.formattedPurchaseDate}}</view>
-    </view>
-    
-    <!-- 信息卡片 -->
-    <view class="info-card">
-      <view class="info-item">
-        <view class="info-label">
-          <view class="info-icon icon-price">
-            <text class="fa fa-tag"></text>
+    <scroll-view scroll-y="true" class="asset-detail-scroll">
+      <!-- 顶部图标和名称 -->
+      <view class="detail-top">
+        <view class="detail-icon-wrapper asset-icon-{{asset.categoryLower}} {{iconAnimating ? 'icon-animating' : ''}}" bindtap="onIconTap">
+          <text class="fa {{asset.iconClass || 'fa-cube'}} icon-color-{{asset.iconColor || 'blue'}}"></text>
+        </view>
+        <view class="detail-info-column">
+          <view class="detail-name">{{asset.name}}</view>
+          <view class="detail-tags">
+            <view class="detail-category-tag">
+              <text class="fa fa-tag tag-icon"></text>
+              <text>{{asset.category}}</text>
+            </view>
+            <view class="detail-warranty-tag {{asset.isExpired ? 'expired' : ''}}" wx:if="{{asset.warrantyDate}}">
+              <text class="fa {{asset.isExpired ? 'fa-exclamation-circle' : 'fa-shield-alt'}} tag-icon"></text>
+              <text>{{asset.isExpired ? '已过保' : '保修中'}}</text>
+            </view>
           </view>
-          购入价格
         </view>
-        <view class="info-value">{{asset.price}}元</view>
       </view>
-      
-      <view class="info-item">
-        <view class="info-label">
-          <view class="info-icon icon-daily">
-            <text class="fa fa-chart-line"></text>
+
+      <!-- 基本信息 -->
+      <view class="detail-section">
+        <view class="detail-section-title">
+          <text class="fa fa-info-circle section-icon"></text>
+          <text>基本信息</text>
+        </view>
+        <view class="detail-info-grid">
+          <view class="detail-info-card">
+            <view class="info-card-label">购买价格</view>
+            <view class="info-card-value">¥{{asset.price}}</view>
           </view>
-          日均
-        </view>
-        <view class="info-value">{{asset.dailyCost}}元/天</view>
-      </view>
-      
-      <view class="info-item">
-        <view class="info-label">
-          <view class="info-icon icon-category">
-            <text class="fa fa-folder"></text>
+          <view class="detail-info-card">
+            <view class="info-card-label">拥有天数</view>
+            <view class="info-card-value">{{asset.usageDays}}<text class="info-unit">天</text></view>
           </view>
-          分类
-        </view>
-        <view class="info-value">{{asset.category || '未分类'}}</view>
-      </view>
-      
-      <view class="info-item" wx:if="{{asset.warrantyDate}}">
-        <view class="info-label">
-          <view class="info-icon icon-warranty">
-            <text class="fa fa-shield-alt"></text>
+          <view class="detail-info-card">
+            <view class="info-card-label">日均成本</view>
+            <view class="info-card-value">¥{{asset.dailyCost}}<text class="info-unit">/天</text></view>
           </view>
-          保修状态
-        </view>
-        <view class="info-value {{warranty.status === 'expired' ? 'status-expired' : warranty.status === 'expiring' ? 'status-expiring' : 'status-valid'}}">
-          {{warranty.status === 'expired' ? '已过期' : warranty.status === 'expiring' ? '即将过期 (剩余' + warranty.daysLeft + '天)' : '保修中'}}
-        </view>
-      </view>
-      
-      <view class="info-item" wx:if="{{asset.description}}">
-        <view class="info-label">
-          <view class="info-icon icon-desc">
-            <text class="fa fa-file-alt"></text>
+          <view class="detail-info-card">
+            <view class="info-card-label">次均成本</view>
+            <view class="info-card-value">¥{{asset.usageCost}}<text class="info-unit">/次</text></view>
           </view>
-          描述
+          <view class="detail-info-card">
+            <view class="info-card-label">当前状态</view>
+            <view class="info-card-value">{{asset.status || '使用中'}}</view>
+          </view>
+          <view class="detail-info-card" bindtap="increaseUsageCount">
+            <view class="info-card-label">使用次数</view>
+            <view class="info-card-value">{{asset.usageCount}}<text class="info-unit">次</text></view>
+          </view>
         </view>
-        <view class="info-value">{{asset.description}}</view>
+
+        <view class="detail-item">
+          <text class="detail-item-icon fa fa-calendar-alt"></text>
+          <text class="detail-label">购买日期</text>
+          <text class="detail-value">{{asset.purchaseDate || '未知'}}</text>
+        </view>
+        <view class="detail-item" wx:if="{{asset.purchaseChannel}}">
+          <text class="detail-item-icon fa fa-shopping-cart"></text>
+          <text class="detail-label">购买渠道</text>
+          <text class="detail-value">{{asset.purchaseChannel}}</text>
+        </view>
+        <view class="detail-item" wx:if="{{asset.warrantyDate}}">
+          <text class="detail-item-icon fa fa-shield-alt"></text>
+          <text class="detail-label">保修日期</text>
+          <text class="detail-value">{{asset.warrantyDate}}</text>
+        </view>
+        <view class="detail-item" wx:if="{{asset.targetDate}}">
+          <text class="detail-item-icon fa fa-calendar-alt"></text>
+          <text class="detail-label">目标日期</text>
+          <text class="detail-value">{{asset.targetDate}}</text>
+        </view>
       </view>
-    </view>
-    
-    <!-- 操作按钮 -->
-    <view class="btns-box">
-      <view class="btn btn-primary" bindtap="goToEdit">
-        <text class="fa fa-edit" style="margin-right: 8px;"></text>编辑
+
+      <!-- 额外费用信息 -->
+      <view class="detail-section" wx:if="{{asset.additionalCosts && asset.additionalCosts.length > 0}}">
+        <view class="detail-section-title">
+          <text class="fa fa-yen-sign section-icon"></text>
+          <text>额外费用记录</text>
+        </view>
+        <view class="detail-extra-costs">
+          <view class="detail-extra-cost-item" wx:for="{{asset.additionalCosts}}" wx:key="index">
+            <view class="detail-extra-cost-header">
+              <view class="detail-extra-cost-name">{{item.name || '未命名费用'}}</view>
+              <view class="detail-extra-cost-type {{item.type === '收入' ? 'income' : 'expense'}}">
+                {{item.type || '支出'}}
+              </view>
+            </view>
+            <view class="detail-extra-cost-content">
+              <view class="detail-extra-cost-amount">¥{{item.amount}}</view>
+              <view class="detail-extra-cost-date">{{item.date}}</view>
+            </view>
+            <view class="detail-extra-cost-desc" wx:if="{{item.description}}">{{item.description}}</view>
+          </view>
+          <view class="detail-extra-cost-total">
+            <text>额外费用总计</text>
+            <text class="total-amount">¥{{asset.totalAdditionalCost}}</text>
+          </view>
+        </view>
       </view>
-      <view class="btn btn-danger" bindtap="showDeleteConfirm" style="margin-left: 16rpx;">
-        <text class="fa fa-trash-alt" style="margin-right: 8px;"></text>删除
+
+      <!-- 附加信息 -->
+      <view class="detail-section" wx:if="{{asset.additionalCost && !asset.additionalCosts}}">
+        <view class="detail-section-title">
+          <text class="fa fa-sliders-h section-icon"></text>
+          <text>附加信息</text>
+        </view>
+        <view class="detail-item" wx:if="{{asset.additionalCost}}">
+          <text class="detail-item-icon fa fa-yen-sign"></text>
+          <text class="detail-label">额外成本</text>
+          <text class="detail-value">¥{{asset.additionalCost}}</text>
+        </view>
+      </view>
+
+      <!-- 备注信息 -->
+      <view class="detail-section" wx:if="{{asset.description}}">
+        <view class="detail-section-title">
+          <text class="fa fa-comment-alt section-icon"></text>
+          <text>备注信息</text>
+        </view>
+        <view class="detail-description">{{asset.description}}</view>
+      </view>
+
+      <!-- 图片展示 -->
+      <view class="detail-section" wx:if="{{asset.imagePaths && asset.imagePaths.length > 0}}">
+        <view class="detail-section-title">
+          <text class="fa fa-images section-icon"></text>
+          <text>资产图片 ({{asset.imagePaths.length}})</text>
+        </view>
+        <view class="detail-image-grid">
+          <view class="detail-image-item" wx:for="{{asset.imagePaths}}" wx:key="index">
+            <image src="{{item}}" mode="aspectFill" bindtap="previewDetailImage" data-src="{{item}}"></image>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+
+    <!-- 底部操作按钮 -->
+    <view class="detail-bottom-actions">
+      <view class="detail-action-btn edit" bindtap="goToEdit">
+        <text class="fa fa-edit"></text>
+        <text>编辑</text>
+      </view>
+      <view class="detail-action-btn delete" bindtap="showDeleteConfirm">
+        <text class="fa fa-trash-alt"></text>
+        <text>删除</text>
       </view>
     </view>
   </block>

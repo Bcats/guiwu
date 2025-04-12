@@ -70,7 +70,11 @@ const dateUtil = {
     
     if (!start || !end) return 0;
     
-    const diffTime = Math.abs(start - end);
+    // 将日期标准化为当天的0点，以确保当天内计算的天数相同
+    const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+    const endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+    
+    const diffTime = Math.abs(endDay - startDay);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   
     return diffDays;

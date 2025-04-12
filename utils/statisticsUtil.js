@@ -3,17 +3,67 @@
  * 提供数据统计和分析功能
  */
 
-const assetManager = require('./assetManager');
+// 为了避免循环引用，延迟导入assetManager
+let assetManager = null;
 const dateUtil = require('./dateUtil');
+
+// 确保在使用时导入assetManager
+function getAssetManager() {
+  if (!assetManager) {
+    assetManager = require('./assetManager');
+  }
+  return assetManager;
+}
+
+// 添加缓存变量
+let _cachedAssets = null;
+let _cacheTimestamp = 0;
+// 缓存过期时间(毫秒)：5分钟
+const CACHE_EXPIRE_TIME = 5 * 60 * 1000;
 
 const statisticsUtil = {
   /**
+   * 获取资产数据，优先使用缓存
+   * @param {Boolean} forceRefresh 是否强制刷新缓存
+   * @returns {Array} 资产列表
+   */
+  getAssets: function(forceRefresh = false) {
+    const now = Date.now();
+    
+    // 如果缓存不存在、强制刷新或缓存过期，则重新获取数据
+    if (forceRefresh || !_cachedAssets || now - _cacheTimestamp > CACHE_EXPIRE_TIME) {
+      _cachedAssets = getAssetManager().getAllAssets();
+      _cacheTimestamp = now;
+    }
+    
+    return _cachedAssets;
+  },
+  
+  /**
+   * 清除缓存
+   */
+  clearCache: function() {
+    _cachedAssets = null;
+    _cacheTimestamp = 0;
+  },
+  
+  /**
+   * 从资产列表计算总价值
+   * @param {Array} assets 资产列表
+   * @returns {Number} 总价值
+   */
+  getTotalValueFromAssets: function(assets) {
+    return assets.reduce((total, asset) => total + (Number(asset.price) || 0), 0);
+  },
+  
+  /**
    * 获取资产概览数据
+   * @param {Boolean} forceRefresh 是否强制刷新缓存
    * @returns {Object} 资产概览数据
    */
-  getOverview: function() {
-    const assets = assetManager.getAllAssets();
-    const totalValue = assetManager.getTotalValue();
+  getOverview: function(forceRefresh = false) {
+    const assets = this.getAssets(forceRefresh);
+    const totalValue = this.getTotalValueFromAssets(assets);
     const assetCount = assets.length;
     
     // 计算日均成本 - 每个资产的单独日均成本之和
@@ -60,8 +110,8 @@ const statisticsUtil = {
    * @returns {Array} 分类统计数据
    */
   getCategoryStatistics: function() {
-    const assets = assetManager.getAllAssets();
-    const totalValue = assetManager.getTotalValue();
+    const assets = this.getAssets();
+    const totalValue = this.getTotalValueFromAssets(assets);
     const categoryMap = {};
     
     // 按分类汇总
@@ -96,7 +146,7 @@ const statisticsUtil = {
    * @returns {Object} 价值分布数据
    */
   getValueDistribution: function() {
-    const assets = assetManager.getAllAssets();
+    const assets = this.getAssets();
     
     // 价格区间划分
     const ranges = {
@@ -127,7 +177,7 @@ const statisticsUtil = {
    * @returns {Array} 月度变化数据
    */
   getMonthlyChange: function() {
-    const assets = assetManager.getAllAssets();
+    const assets = this.getAssets();
     const monthlyData = {};
     
     // 按月统计资产增加情况
@@ -182,7 +232,7 @@ const statisticsUtil = {
    * @returns {Array} 最常使用的资产列表
    */
   getMostUsedAssets: function(limit = 5) {
-    const assets = assetManager.getAllAssets();
+    const assets = this.getAssets();
     
     return assets
       .sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0))
@@ -202,7 +252,7 @@ const statisticsUtil = {
    * @returns {Array} 最近添加的资产列表
    */
   getRecentlyAddedAssets: function(limit = 5) {
-    const assets = assetManager.getAllAssets();
+    const assets = this.getAssets();
     
     return assets
       .sort((a, b) => {

@@ -22,6 +22,22 @@
     <text class="loading-text">加载中...</text>
   </view>
 
+  <!-- 操作菜单遮罩层 -->
+  <view class="action-menu-mask" wx:if="{{showActionMenuId}}" catchtap="closeActionMenu"></view>
+  
+  <!-- 操作菜单面板 -->
+  <view class="simple-action-menu" wx:if="{{showActionMenuId}}" catchtap="stopPropagation">
+    <view class="action-menu-item" catchtap="editAsset" data-id="{{showActionMenuId}}">
+      编辑
+    </view>
+    <view class="action-menu-item" catchtap="topAsset" data-id="{{showActionMenuId}}">
+      置顶
+    </view>
+    <view class="action-menu-item" catchtap="deleteAsset" data-id="{{showActionMenuId}}">
+      删除
+    </view>
+  </view>
+
   <view class="index-scroll-view" wx:if="{{!loading}}" catchtap="onPageTap">
     <!-- 我的资产概览 -->
     <view class="overview-card">
@@ -55,7 +71,7 @@
         </view>
         <view class="overview-sub-item">
           <view class="overview-sub-label">二手估值</view>
-          <view class="overview-sub-value">{{hideData ? '**' : (secondHandValue ? '¥' + secondHandValue : '--') }}</view>
+          <view class="overview-sub-value">{{hideData ? '**' : (secondHandValue ? '¥' + secondHandValue : '暂无') }}</view>
         </view>
       </view>
     </view>
@@ -115,6 +131,7 @@
       </view>
     </view>
 
+    <!-- 资产列表区域 - 移除滚动容器 -->
     <!-- 资产列表 -->
     <block wx:if="{{filteredAssets.length > 0}}">
       <view 
@@ -123,13 +140,11 @@
         class="asset-card-wrapper"
         data-id="{{item.id}}" 
         catchtap="showAssetDetail" 
-        bindtouchstart="onAssetTouchStart" 
-        catchtouchmove="onAssetTouchMove" 
-        bindtouchend="onAssetTouchEnd"
+        bindlongpress="onAssetLongPress"
       >
         <view 
           class="asset-card {{item.status === '停用' ? 'asset-card-stop' : ''}}" 
-          style="transform: translateX({{currentSlideAssetId === item.id ? -slideProgress * maxSlideDistance : 0}}rpx); transition: {{slideAnimating ? 'all 0.3s cubic-bezier(0.25, 0.8, 0.5, 1)' : 'none'}}; box-shadow: {{currentSlideAssetId === item.id ? '0 8rpx ' + (20 + slideProgress * 10) + 'rpx rgba(0, 0, 0, ' + (0.05 + slideProgress * 0.05) + ')' : '0 8rpx 20rpx rgba(0, 0, 0, 0.05)'}}; z-index: {{currentSlideAssetId === item.id ? 2 : 1}};"
+          style="box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.05); z-index: 1;"
         >
           <!-- 图标部分 -->
           <view class="asset-icon-wrapper asset-icon-{{item.categoryLower}}">
@@ -154,27 +169,8 @@
           </view>
           
           <!-- 使用时间 -->
-    
         </view>
-
-        <!-- 左滑操作按钮 -->
-        <view class="slide-options" style="opacity: {{currentSlideAssetId === item.id ? slideProgress : 0}}; filter: blur({{currentSlideAssetId === item.id ? (1-slideProgress) * 4 : 0}}rpx); transform: translateX({{currentSlideAssetId === item.id ? (1-slideProgress) * 15 : 0}}rpx); transition: {{slideAnimating ? 'all 0.3s cubic-bezier(0.25, 0.8, 0.5, 1)' : 'none'}};">
-          <view class="option-top" bindtap="topAsset" data-id="{{item.id}}">
-            <text class="fa fa-thumbtack"></text>
-            <text>置顶</text>
-          </view>
-          <view class="option-edit" bindtap="editAsset" data-id="{{item.id}}">
-            <text class="fa fa-edit"></text>
-            <text>编辑</text>
-          </view>
-          <view class="option-delete" bindtap="deleteAsset" data-id="{{item.id}}">
-            <text class="fa fa-trash"></text>
-            <text>删除</text>
-          </view>
-        </view>
-
       </view>
-
     </block>
 
     <!-- 空状态 -->
@@ -188,7 +184,7 @@
   <view class="floating-btn" bindtap="goToAdd" catchtouchstart="btnTouchStart" catchtouchmove="btnTouchMove" catchtouchend="btnTouchEnd" style="top:{{btnPosition.y}}px; left:{{btnPosition.x}}px;">
     <text class="fa fa-plus"></text>
   </view>
-
+  
   <!-- 资产详情弹出层 -->
   <view class="asset-detail-popup {{showDetailPopup ? 'show' : ''}}" catchtap="closeAssetDetail">
     <view class="asset-detail-content" catchtap="stopPropagation">
@@ -214,7 +210,7 @@
               </view>
               <view class="detail-warranty-tag {{detailAsset.isExpired ? 'expired' : ''}}" wx:if="{{detailAsset.warrantyDate}}">
                 <text class="fa {{detailAsset.isExpired ? 'fa-exclamation-circle' : 'fa-shield-alt'}} tag-icon"></text>
-                <text>{{detailAsset.isExpired ? '已过期' : '保修中'}}</text>
+                <text>{{detailAsset.isExpired ? '已过保' : '保修中'}}</text>
               </view>
             </view>
           </view>
@@ -310,5 +306,4 @@
       <view class="detail-bottom-space"></view>
     </view>
   </view>
-
 </view>

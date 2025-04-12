@@ -19,7 +19,8 @@ Page({
       status: '使用中', // 默认状态
       expectedDailyCost: '',
       targetDate: '',
-      additionalCost: '',
+      purchaseChannel: '', // 购买渠道
+      additionalCosts: [], // 额外费用数组
       usageCount: 0, // 使用次数
     },
     // 编辑前的资产对象（用于取消编辑时恢复）
@@ -49,7 +50,21 @@ Page({
     purchaseDate: '', // 购买日期
     warrantyDate: '', // 保修日期
     description: '', // 备注描述
+    purchaseChannel: '', // 购买渠道
+    additionalCosts: [], // 额外费用数组
     usageCount: 0, // 使用次数
+    // 额外费用编辑
+    showExtraCostModal: false, // 是否显示额外费用编辑弹窗
+    currentExtraCost: {  // 当前编辑的额外费用
+      id: '', 
+      name: '',
+      amount: '',
+      date: '',
+      type: '支出', // 默认为支出类型
+      description: ''
+    },
+    currentExtraCostIndex: -1, // 当前编辑的额外费用索引，-1表示新增
+    // 其他数据
     tempImagePaths: [], // 临时图片路径数组
     selectedIcon: '', // 选中的图标
     iconName: '', // 选中的图标名称
@@ -66,6 +81,11 @@ Page({
       { id: 7, name: '交通工具' },
       { id: 8, name: '收藏品' },
       { id: 9, name: '其他' }
+    ],
+    // 常用购买渠道选项
+    channelOptions: [
+      '京东', '淘宝', '天猫', '拼多多', '线下店铺',
+      '苏宁易购', '唯品会', '亚马逊', '其他'
     ],
     // 编辑模式
     isEditMode: false,
@@ -132,7 +152,9 @@ Page({
         purchaseDate: formattedDate,
         categoryId: otherCategory.id,
         categoryText: otherCategory.name,
-        statusActive: true // 默认状态为"使用中"
+        statusActive: true, // 默认状态为"使用中"
+        purchaseChannel: '', // 购买渠道
+        additionalCosts: [], // 额外费用数组
       });
     }
     
@@ -201,7 +223,8 @@ Page({
         'asset.description': asset.description,
         'asset.status': asset.status || '使用中',
         'asset.targetDate': asset.targetDate || '',
-        'asset.additionalCost': asset.additionalCost || '',
+        'asset.purchaseChannel': asset.purchaseChannel || '',
+        'asset.additionalCosts': asset.additionalCosts || [],
         'asset.id': asset.id,
         assetName: asset.name,
         assetPrice: asset.price,
@@ -215,7 +238,12 @@ Page({
         iconName: asset.iconName || '',
         currentCategory: currentCategory,
         usageCount: usageCount,
-        'asset.usageCount': usageCount
+        'asset.usageCount': usageCount,
+        'asset.purchaseChannel': asset.purchaseChannel || '',
+        'asset.additionalCosts': asset.additionalCosts || [],
+        // 直接设置顶层变量，以便正确显示在表单中
+        purchaseChannel: asset.purchaseChannel || '',
+        additionalCosts: asset.additionalCosts || []
       });
     }
   },
@@ -400,13 +428,9 @@ Page({
     const field = e.currentTarget.dataset.field;
     const value = e.detail.value;
     
-    // 更新字段值
+    // 更新对应的日期字段
     this.setData({
-      [field]: value
-    });
-    
-    // 同时更新asset对象中对应的字段
-    this.setData({
+      [field]: value,
       [`asset.${field}`]: value
     });
   },
@@ -558,6 +582,256 @@ Page({
     }, 2000);
   },
   
+  // 显示添加额外费用弹窗
+  showAddExtraCost: function() {
+    // 初始化为当前日期
+    const today = dateUtil.formatDate(new Date());
+    
+    this.setData({
+      currentExtraCost: {
+        id: Date.now().toString(), // 使用时间戳作为临时ID
+        name: '',
+        amount: '',
+        date: today,
+        type: '支出', // 默认为支出类型
+        description: ''
+      },
+      currentExtraCostIndex: -1, // -1表示新增
+      showExtraCostModal: true
+    });
+  },
+  
+  // 选择费用类型
+  selectCostType: function(e) {
+    const type = e.currentTarget.dataset.type;
+    this.setData({
+      'currentExtraCost.type': type
+    });
+  },
+  
+  // 显示编辑额外费用弹窗
+  showEditExtraCost: function(e) {
+    const index = e.currentTarget.dataset.index;
+    const extraCost = this.data.additionalCosts[index];
+    
+    this.setData({
+      currentExtraCost: { ...extraCost },
+      currentExtraCostIndex: index,
+      showExtraCostModal: true
+    });
+  },
+  
+  // 关闭额外费用弹窗
+  closeExtraCostModal: function() {
+    this.setData({
+      showExtraCostModal: false
+    });
+  },
+  
+  // 绑定额外费用字段变化
+  bindExtraCostInput: function(e) {
+    const field = e.currentTarget.dataset.field;
+    const value = e.detail.value;
+    
+    this.setData({
+      [`currentExtraCost.${field}`]: value
+    });
+  },
+  
+  // 选择额外费用日期
+  bindExtraCostDateChange: function(e) {
+    this.setData({
+      'currentExtraCost.date': e.detail.value
+    });
+  },
+  
+  // 保存额外费用
+  saveExtraCost: function() {
+    const { currentExtraCost, currentExtraCostIndex, additionalCosts } = this.data;
+    
+    // 验证额外费用
+    if (!currentExtraCost.name) {
+      wx.showToast({
+        title: '请输入费用名称',
+        icon: 'none'
+      });
+      return;
+    }
+    
+    if (!currentExtraCost.amount || isNaN(parseFloat(currentExtraCost.amount)) || parseFloat(currentExtraCost.amount) <= 0) {
+      wx.showToast({
+        title: '请输入有效的额外费用金额',
+        icon: 'none'
+      });
+      return;
+    }
+    
+    if (!currentExtraCost.date) {
+      wx.showToast({
+        title: '请选择费用日期',
+        icon: 'none'
+      });
+      return;
+    }
+    
+    // 确保金额是数字
+    currentExtraCost.amount = parseFloat(currentExtraCost.amount);
+    
+    let newAdditionalCosts = [...additionalCosts];
+    
+    if (currentExtraCostIndex === -1) {
+      // 新增
+      newAdditionalCosts.push(currentExtraCost);
+    } else {
+      // 编辑
+      newAdditionalCosts[currentExtraCostIndex] = currentExtraCost;
+    }
+    
+    // 按日期降序排序（最新的在前面）
+    newAdditionalCosts.sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    this.setData({
+      additionalCosts: newAdditionalCosts,
+      'asset.additionalCosts': newAdditionalCosts,
+      showExtraCostModal: false
+    });
+  },
+  
+  // 删除额外费用
+  deleteExtraCost: function(e) {
+    const index = e.currentTarget.dataset.index;
+    const costItem = this.data.additionalCosts[index];
+    
+    // 显示删除确认对话框
+    wx.showModal({
+      title: '确认删除',
+      content: `确定要删除"${costItem.name || '未命名费用'}"吗？`,
+      confirmColor: '#f5222d',
+      success: (res) => {
+        if (res.confirm) {
+          let newAdditionalCosts = [...this.data.additionalCosts];
+          
+          // 从数组中移除指定索引的费用
+          newAdditionalCosts.splice(index, 1);
+          
+          this.setData({
+            additionalCosts: newAdditionalCosts,
+            'asset.additionalCosts': newAdditionalCosts
+          });
+          
+          wx.showToast({
+            title: '已删除',
+            icon: 'success'
+          });
+        }
+      }
+    });
+  },
+  
+  // 根据图标类名获取图标名称
+  getIconName: function(iconClass) {
+    // 根据图标类型设定名称
+    const iconNameMap = {
+      'fa-mobile-alt': '手机',
+      'fa-laptop': '笔记本',
+      'fa-desktop': '台式机',
+      'fa-headphones': '耳机',
+      'fa-camera': '相机',
+      'fa-tv': '电视',
+      'fa-keyboard': '键盘',
+      'fa-mouse': '鼠标',
+      'fa-tablet-alt': '平板',
+      'fa-watch': '手表',
+      'fa-laptop-code': '开发本',
+      'fa-print': '打印机',
+      'fa-couch': '沙发',
+      'fa-bed': '床',
+      'fa-chair': '椅子',
+      'fa-table': '桌子',
+      'fa-bath': '浴缸',
+      'fa-lightbulb': '灯泡',
+      'fa-toilet': '马桶',
+      'fa-shower': '淋浴',
+      'fa-sink': '水槽',
+      'fa-door-open': '门',
+      'fa-fan': '风扇',
+      'fa-box': '盒子',
+      'fa-car': '汽车',
+      'fa-bicycle': '自行车',
+      'fa-motorcycle': '摩托车',
+      'fa-bus': '公交车',
+      'fa-subway': '地铁',
+      'fa-train': '火车',
+      'fa-plane': '飞机',
+      'fa-ship': '轮船',
+      'fa-truck': '卡车',
+      'fa-rocket': '火箭',
+      'fa-helicopter': '直升机',
+      'fa-tractor': '拖拉机',
+      'fa-blender': '搅拌机',
+      'fa-coffee': '咖啡机',
+      'fa-mug-hot': '热饮杯',
+      'fa-utensils': '餐具',
+      'fa-pizza-slice': '披萨',
+      'fa-wine-glass': '酒杯',
+      'fa-hamburger': '汉堡',
+      'fa-blender-phone': '搅拌器',
+      'fa-pepper-hot': '辣椒',
+      'fa-carrot': '胡萝卜',
+      'fa-ice-cream': '冰淇淋',
+      'fa-cookie': '饼干',
+      'fa-gamepad': '游戏手柄',
+      'fa-dice': '骰子',
+      'fa-chess': '国际象棋',
+      'fa-bowling-ball': '保龄球',
+      'fa-guitar': '吉他',
+      'fa-drum': '鼓',
+      'fa-headset': '游戏耳机',
+      'fa-football-ball': '橄榄球',
+      'fa-basketball-ball': '篮球',
+      'fa-baseball-ball': '棒球',
+      'fa-golf-ball': '高尔夫球',
+      'fa-table-tennis': '乒乓球',
+      'fa-tshirt': 'T恤',
+      'fa-hat-cowboy': '牛仔帽',
+      'fa-socks': '袜子',
+      'fa-shoe-prints': '鞋子',
+      'fa-user-tie': '西装',
+      'fa-glasses': '眼镜',
+      'fa-crown': '皇冠',
+      'fa-hat-wizard': '巫师帽',
+      'fa-mitten': '手套',
+      'fa-vest': '马甲',
+      'fa-graduation-cap': '学士帽',
+      'fa-mask': '面具',
+      'fa-book': '书籍',
+      'fa-gift': '礼物',
+      'fa-gem': '宝石',
+      'fa-tools': '工具',
+      'fa-briefcase': '公文包',
+      'fa-umbrella': '雨伞',
+      'fa-paint-brush': '画笔',
+      'fa-pen': '钢笔',
+      'fa-coins': '硬币',
+      'fa-medal': '奖牌',
+      'fa-trophy': '奖杯',
+      'fa-heart': '爱心',
+      'fa-cube': '其他'
+    };
+    
+    return iconNameMap[iconClass] || '自定义图标';
+  },
+  
+  // 选择购买渠道
+  selectPurchaseChannel: function(e) {
+    const channel = e.currentTarget.dataset.channel;
+    
+    this.setData({
+      purchaseChannel: channel,
+      'asset.purchaseChannel': channel
+    });
+  },
+  
   // 验证表单
   validateForm: function() {
     // 验证资产名称
@@ -619,6 +893,8 @@ Page({
       targetDate: this.data.targetDate || '', // 由于targetDate可能不存在，直接使用实例变量
       iconColor: this.data.selectedColor || 'blue',
       usageCount: usageCount, // 确保使用整数
+      purchaseChannel: this.data.purchaseChannel || '',
+      additionalCosts: this.data.additionalCosts || [],
     };
     
     let result = false;
@@ -661,8 +937,8 @@ Page({
               delta: pages.length - indexPageIndex - 1
             });
           } else {
-            // 如果找不到首页，则重定向到首页
-            wx.redirectTo({
+            // 如果找不到首页，则使用switchTab跳转到首页
+            wx.switchTab({
               url: '/pages/index/index'
             });
           }

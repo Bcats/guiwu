@@ -49,7 +49,8 @@ Page({
     this.setData({ loading: true });
     
     setTimeout(() => {
-      const overview = statisticsUtil.getOverview();
+      // 首次获取数据时强制刷新缓存，确保数据最新
+      const overview = statisticsUtil.getOverview(true);
       const categories = statisticsUtil.getCategoryStatistics();
       const mostUsedAssets = statisticsUtil.getMostUsedAssets(5);
       const recentlyAddedAssets = statisticsUtil.getRecentlyAddedAssets(5);
@@ -210,6 +211,8 @@ Page({
       title: '刷新中...',
     });
     
+    // 下拉刷新时清除缓存，确保获取最新数据
+    statisticsUtil.clearCache();
     this.loadStatisticsData();
     
     setTimeout(() => {

@@ -3,6 +3,17 @@
  * 提供资产的增删改查等功能
  */
 
+// 避免循环引用
+let statisticsUtil = null;
+
+// 确保在使用时导入statisticsUtil
+function getStatisticsUtil() {
+  if (!statisticsUtil) {
+    statisticsUtil = require('./statisticsUtil');
+  }
+  return statisticsUtil;
+}
+
 /**
  * 生成唯一ID
  * @returns {string} 唯一ID
@@ -75,6 +86,13 @@ const assetManager = {
       
       wx.setStorageSync('assets', assets);
       console.log('资产保存成功，使用次数:', asset.usageCount);
+      
+      // 清除统计缓存
+      const stats = getStatisticsUtil();
+      if (stats) {
+        stats.clearCache();
+      }
+      
       return true;
     } catch (e) {
       console.error('保存资产失败:', e);
@@ -101,6 +119,13 @@ const assetManager = {
         assets[index] = asset;
         wx.setStorageSync('assets', assets);
         console.log('资产更新成功，使用次数:', asset.usageCount);
+        
+        // 清除统计缓存
+        const stats = getStatisticsUtil();
+        if (stats) {
+          stats.clearCache();
+        }
+        
         return true;
       }
       return false;
@@ -121,6 +146,13 @@ const assetManager = {
       const newAssets = assets.filter(asset => asset.id !== id);
       if (newAssets.length !== assets.length) {
         wx.setStorageSync('assets', newAssets);
+        
+        // 清除统计缓存
+        const stats = getStatisticsUtil();
+        if (stats) {
+          stats.clearCache();
+        }
+        
         return true;
       }
       return false;
@@ -143,6 +175,13 @@ const assetManager = {
         assets[index].usageCount = (assets[index].usageCount || 0) + 1;
         assets[index].lastUsageTime = new Date().toISOString();
         wx.setStorageSync('assets', assets);
+        
+        // 清除统计缓存
+        const stats = getStatisticsUtil();
+        if (stats) {
+          stats.clearCache();
+        }
+        
         return true;
       }
       return false;

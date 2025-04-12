@@ -91,7 +91,10 @@ Page({
     // 资产详情弹出层
     showDetailPopup: false,
     detailAsset: null,
-    iconAnimating: false
+    iconAnimating: false,
+    // 长按资产卡片相关
+    showActionMenuId: null,
+    actionMenuTimer: null
   },
 
   onLoad: function () {
@@ -168,16 +171,19 @@ Page({
   onShow: function() {
     console.log('首页显示 - onShow');
     
+    // 检查日期是否变化，如果变化则重新加载资产以更新天数
+    this.checkDateChange();
+    
+    // 总是重新加载资产数据，确保最新状态
+    this.loadAssets();
+    
     // 检查全局刷新标记
     if (app.globalData && app.globalData.needRefresh) {
-      console.log('检测到全局刷新标记，正在重新加载资产...');
-      this.loadAssets();
+      console.log('检测到全局刷新标记');
       app.globalData.needRefresh = false;
     }
-    // 如果标记为需要刷新，则重新加载资产
-    else if (this.data.refreshOnAdd) {
-      console.log('检测到需要刷新标记，正在重新加载资产...');
-      this.loadAssets();
+    // 重置刷新标记
+    if (this.data.refreshOnAdd) {
       this.setData({ refreshOnAdd: false });
     }
     
@@ -190,6 +196,31 @@ Page({
     
     // 确保所有卡片初始状态都是收起的
     this.resetAssetCardStates();
+  },
+  
+  // 检查日期是否变化，变化则更新资产天数
+  checkDateChange: function() {
+    try {
+      // 获取当前日期的字符串表示（仅包含年月日）
+      const today = new Date();
+      const dateStr = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+      
+      // 从缓存获取上次更新的日期
+      const lastUpdateDate = wx.getStorageSync('lastUpdateDate') || '';
+      
+      console.log('当前日期:', dateStr, '上次更新日期:', lastUpdateDate);
+      
+      // 如果日期变化，则重新加载资产数据
+      if (dateStr !== lastUpdateDate) {
+        console.log('检测到日期变化，需要更新资产天数');
+        this.loadAssets(true);
+        
+        // 更新缓存中的日期
+        wx.setStorageSync('lastUpdateDate', dateStr);
+      }
+    } catch (e) {
+      console.error('检查日期变化失败:', e);
+    }
   },
   
   // 重置资产卡片的状态
@@ -216,8 +247,8 @@ Page({
   },
 
   // 加载资产列表
-  loadAssets: function () {
-    console.log('开始加载资产数据');
+  loadAssets: function (isDateChange = false) {
+    console.log('开始加载资产数据', isDateChange ? '(日期变化触发)' : '');
     this.setData({ loading: true });
     
     try {
@@ -344,27 +375,60 @@ Page({
   calculateUsageDays: function(asset) {
     if (!asset.purchaseDate) return 0;
     
-    const purchaseDate = new Date(asset.purchaseDate);
-    const today = new Date();
-    const diffTime = Math.abs(today - purchaseDate);
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+    // 使用dateUtil的daysBetween方法，确保与全局日期计算逻辑一致
+    // 该方法已经被修改为使用0点作为计算基准
+    const days = dateUtil.daysBetween(asset.purchaseDate, new Date());
+    return days || 1; // 确保至少为1天，避免除以0的错误
   },
   
   // 计算每日成本
   calculateDailyCost: function(asset, usageDays) {
-    if (!asset.price || !usageDays) return 0;
+    if (!asset || !asset.price) return '0.00';
     
-    const price = parseFloat(asset.price);
-    return (price / usageDays).toFixed(2);
+    // 获取基础价格
+    let totalCost = Number(asset.price);
+    
+    // 添加额外费用
+    if (asset.additionalCosts && Array.isArray(asset.additionalCosts)) {
+      asset.additionalCosts.forEach(cost => {
+        totalCost += Number(cost.amount) || 0;
+      });
+    } else if (asset.additionalCost) {
+      // 兼容旧版额外费用字段
+      totalCost += Number(asset.additionalCost) || 0;
+    }
+    
+    // 确保使用天数至少为1
+    const effectiveUsageDays = Math.max(1, usageDays);
+    
+    // 计算日均成本并保留两位小数
+    const dailyCost = (totalCost / effectiveUsageDays).toFixed(2);
+    return dailyCost;
   },
   
   // 计算次均成本
   calculateUsageCost: function(asset) {
-    if (!asset.price) return 0;
+    if (!asset || !asset.price) return '0.00';
     
-    const price = parseFloat(asset.price);
-    const usageCount = parseInt(asset.usageCount || 1);
-    return (price / Math.max(1, usageCount)).toFixed(2);
+    // 获取基础价格
+    let totalCost = Number(asset.price);
+    
+    // 添加额外费用
+    if (asset.additionalCosts && Array.isArray(asset.additionalCosts)) {
+      asset.additionalCosts.forEach(cost => {
+        totalCost += Number(cost.amount) || 0;
+      });
+    } else if (asset.additionalCost) {
+      // 兼容旧版额外费用字段
+      totalCost += Number(asset.additionalCost) || 0;
+    }
+    
+    // 获取使用次数，确保至少为1
+    const usageCount = Math.max(1, parseInt(asset.usageCount || 1));
+    
+    // 计算次均成本并保留两位小数
+    const usageCost = (totalCost / usageCount).toFixed(2);
+    return usageCost;
   },
   
   // 计算使用率
@@ -592,231 +656,39 @@ Page({
     });
   },
   
-  // 处理资产卡片的触摸事件
-  onAssetTouchStart: function(e) {
-    // 获取当前触摸的资产ID
+  // 长按资产卡片
+  onAssetLongPress: function(e) {
     const assetId = e.currentTarget.dataset.id;
+    console.log('长按资产卡片:', assetId);
     
-    // 记录起始触摸位置和时间
-    this.touchStartX = e.touches[0].pageX;
-    this.touchStartY = e.touches[0].pageY;
-    this.touchStartTime = Date.now();
-    this.isTouchMove = false;
-    this.totalMoveDistance = 0;
-    
-    // 关闭滑动动画，确保跟手感
+    // 切换当前菜单的显示状态
     this.setData({
-      slideAnimating: false
+      showActionMenuId: assetId
+    });
+    
+    // 添加震动反馈
+    wx.vibrateShort({
+      type: 'medium'
     });
   },
   
-  onAssetTouchMove: function(e) {
-    const moveX = e.touches[0].pageX;
-    const moveY = e.touches[0].pageY;
+  // 关闭操作菜单
+  closeActionMenu: function() {
+    console.log('关闭操作菜单');
+    this.setData({
+      showActionMenuId: null
+    });
     
-    // 计算X和Y方向的移动距离
-    const deltaX = moveX - this.touchStartX;
-    const deltaY = moveY - this.touchStartY;
-    
-    // 计算总移动距离
-    this.totalMoveDistance = Math.abs(deltaX);
-    
-    // 如果Y方向移动大于X方向，不处理左右滑动，让页面自然滚动
-    if (Math.abs(deltaY) > Math.abs(deltaX)) {
-      return;
-    }
-    
-    // 节流处理：限制UI更新频率，提高性能
-    const now = Date.now();
-    if (this.lastUpdateTime && now - this.lastUpdateTime < 16) { // 约60fps
-      return;
-    }
-    this.lastUpdateTime = now;
-    
-    // 降低滑动触发阈值，提高灵敏度
-    if (Math.abs(deltaX) > 2) { // 更低的阈值，更灵敏
-      this.isTouchMove = true;
-      
-      // 获取当前触摸的资产ID
-      const assetId = e.currentTarget.dataset.id;
-      
-      // 计算滑动进度
-      let progress = 0;
-      
-      // 计算门槛值
-      const threshold = this.data.maxSlideDistance * 0.4;
-      
-      // 向左滑动时，deltaX为负值，打开操作按钮
-      if (deltaX < 0) {
-        // 只有当没有其他卡片展开或者正在操作当前卡片时，才允许左滑
-        if (!this.data.currentSlideAssetId || this.data.currentSlideAssetId === assetId) {
-          // 计算左滑进度，范围0-1
-          progress = Math.min(1, Math.abs(deltaX) / threshold);
-          this.slideDirection = 'left';
-        } else {
-          // 如果其他卡片已经展开，不处理
-          return;
-        }
-      } 
-      // 向右滑动时，deltaX为正值
-      else if (deltaX > 0) {
-        // 只有当前卡片已经处于左滑状态时才处理右滑
-        if (this.data.currentSlideAssetId === assetId && this.data.slideProgress > 0) {
-          // 简单对称：用当前进度减去右滑带来的进度变化
-          // 将右滑距离等比例转换为进度减少量
-          const progressDecrement = Math.min(1, deltaX / threshold);
-          // 当前进度减去右滑进度，最小为0
-          progress = Math.max(0, this.data.slideProgress - progressDecrement);
-          
-          this.slideDirection = 'right';
-        } else {
-          return; // 如果卡片未处于左滑状态，不处理右滑
-        }
-      }
-      
-      // 随着进度变化调整视觉效果
-      const rightCornerRadius = progress > 0.8 ? 8 : Math.max(8, 32 - progress * 32);
-      
-      // 更新滑动状态
-      this.setData({
-        slideAnimating: false, // 触摸移动时禁用动画，保证跟手感
-        currentSlideAssetId: assetId,
-        slideProgress: progress,
-        rightCornerRadius: rightCornerRadius
-      });
+    if (this.actionMenuTimer) {
+      clearTimeout(this.actionMenuTimer);
     }
   },
   
-  onAssetTouchEnd: function(e) {
-    if (!this.isTouchMove) {
-      return;
-    }
-    
-    this.isTouchMove = false;
-    
-    // 获取结束触摸时间
-    const endTime = Date.now();
-    const touchDuration = endTime - this.touchStartTime;
-    
-    // 计算平均速度（像素/毫秒）
-    const speed = this.totalMoveDistance / Math.max(touchDuration, 1);
-    
-    // 速度阈值
-    const speedThreshold = 0.15;
-    
-    const assetId = e.currentTarget.dataset.id;
-    const slideDirection = this.slideDirection || 'none';
-    
-    // 启用动画，使后续变化平滑
-    this.setData({
-      slideAnimating: true
-    });
-    
-    // 进度阈值
-    const progressThreshold = 0.2;
-    
-    // 根据滑动方向和进度决定最终状态
-    if (slideDirection === 'left') {
-      // 左滑：进度大或速度快则完全展开，否则恢复原位
-      if (this.data.slideProgress > progressThreshold || speed > speedThreshold) {
-        this.setData({
-          slideProgress: 1,
-          rightCornerRadius: 8
-        });
-      } else {
-        this.restoreCardPosition(assetId);
-      }
-    } else if (slideDirection === 'right') {
-      // 右滑：进度小或速度快则完全恢复，否则保持原位
-      if (this.data.slideProgress < (1 - progressThreshold) || speed > speedThreshold) {
-        this.restoreCardPosition(assetId);
-      } else {
-        // 保持展开状态
-        this.setData({
-          slideProgress: 1,
-          rightCornerRadius: 8
-        });
-      }
-    } else {
-      // 无明确方向，根据当前进度决定
-      if (this.data.slideProgress > 0.5) {
-        this.setData({
-          slideProgress: 1,
-          rightCornerRadius: 8
-        });
-      } else {
-        this.restoreCardPosition(assetId);
-      }
-    }
-    
-    // 清除滑动方向
-    this.slideDirection = null;
-  },
-  
-  // 恢复卡片位置的辅助函数
-  restoreCardPosition: function(assetId) {
-    // 启用动画，设为0进度
-    this.setData({
-      slideAnimating: true,
-      slideProgress: 0,
-      rightCornerRadius: 32
-    });
-    
-    // 立即重置当前滑动资产ID，不等待动画完成
-    this.setData({
-      currentSlideAssetId: null
-    });
-    
-    // 仍然保留计时器以确保动画完成后UI状态一致
-    setTimeout(() => {
-      // 额外的安全检查，确保进度确实为0
-      if (this.data.slideProgress !== 0) {
-        this.setData({
-          slideProgress: 0
-        });
-      }
-    }, 300);
-  },
-  
-  // 关闭所有滑动选项
-  closeAllSlideOptions: function() {
-    // 如果没有打开的卡片，直接返回
-    if (!this.data.currentSlideAssetId) {
-      return;
-    }
-    
-    // 保存当前滑动卡片ID，以便后续清理
-    const slidingCardId = this.data.currentSlideAssetId;
-    
-    // 启用动画，设为0进度
-    this.setData({
-      slideAnimating: true,
-      slideProgress: 0,
-      rightCornerRadius: 32
-    });
-    
-    // 立即重置当前滑动状态，不等待动画完成
-    // 这样可以确保在showAssetDetail中点击其他卡片时能正确显示详情
-    this.setData({
-      currentSlideAssetId: null
-    });
-    
-    // 仍然保留计时器以确保动画完成后UI状态一致
-    setTimeout(() => {
-      // 额外的安全检查，确保进度确实为0
-      if (this.data.slideProgress !== 0) {
-        this.setData({
-          slideProgress: 0
-        });
-      }
-    }, 300);
-  },
-  
-  // 单击页面空白区域时关闭所有滑动选项
+  // 单击页面空白区域时关闭所有操作菜单
   onPageTap: function() {
-    // 当点击页面空白区域时，关闭所有展开的滑动选项
-    if (this.data.currentSlideAssetId) {
-      this.closeAllSlideOptions();
+    // 当点击页面空白区域时，关闭所有操作菜单
+    if (this.data.showActionMenuId) {
+      this.closeActionMenu();
     }
   },
   
@@ -824,6 +696,9 @@ Page({
   editAsset: function(e) {
     const id = e.currentTarget.dataset.id;
     console.log('编辑资产', id);
+    
+    // 关闭操作菜单
+    this.closeActionMenu();
     
     // 隐藏滑动操作区
     this.setData({
@@ -848,6 +723,9 @@ Page({
     }
     
     const name = asset.name;
+    
+    // 关闭操作菜单
+    this.closeActionMenu();
     
     // 显示删除确认对话框
     wx.showModal({
@@ -886,6 +764,9 @@ Page({
   topAsset: function(e) {
     const id = e.currentTarget.dataset.id;
     console.log('置顶资产', id);
+    
+    // 关闭操作菜单
+    this.closeActionMenu();
     
     // 获取当前资产列表
     const assets = this.data.assets;
@@ -969,10 +850,24 @@ Page({
       asset.isExpired = false;
     }
     
-    // 显示资产详情
-    this.setData({
-      detailAsset: asset,
-      showDetailPopup: true
+    // 计算额外费用总计
+    let totalAdditionalCost = 0;
+    
+    if (asset.additionalCosts && Array.isArray(asset.additionalCosts)) {
+      asset.additionalCosts.forEach(cost => {
+        totalAdditionalCost += Number(cost.amount) || 0;
+      });
+    } else if (asset.additionalCost) {
+      // 兼容旧版额外费用字段
+      totalAdditionalCost = Number(asset.additionalCost) || 0;
+    }
+    
+    // 设置额外费用总计
+    asset.totalAdditionalCost = totalAdditionalCost.toFixed(2);
+    
+    // 跳转到详情页面
+    wx.navigateTo({
+      url: `/pages/detail/detail?id=${asset.id}`
     });
   },
   
@@ -1197,22 +1092,8 @@ Page({
   
   // 下拉刷新
   onPullDownRefresh: function() {
-    console.log('下拉刷新触发');
-    wx.showLoading({
-      title: '刷新中...',
-    });
-    
-    this.loadAssets();
-    
-    setTimeout(() => {
-      wx.hideLoading();
-      wx.stopPullDownRefresh();
-      wx.showToast({
-        title: '刷新成功',
-        icon: 'success',
-        duration: 1500
-      });
-    }, 800);
+    console.log('下拉刷新');
+    this.refreshAssets();
   },
   
   // 保留原有goToDetail方法以保持兼容性
@@ -1332,5 +1213,26 @@ Page({
     this.setData({
       hideData: !this.data.hideData
     });
+  },
+
+  /**
+   * 刷新资产数据
+   */
+  refreshAssets: function() {
+    wx.showLoading({
+      title: '刷新中...',
+    });
+    
+    this.loadAssets();
+    
+    setTimeout(() => {
+      wx.hideLoading();
+      wx.stopPullDownRefresh();
+      wx.showToast({
+        title: '刷新成功',
+        icon: 'success',
+        duration: 1500
+      });
+    }, 600);
   },
 }); 

@@ -7,7 +7,7 @@
         <view class="form-item">
           <view class="form-content" bindtap="showIconPicker">
             <view class="icon-preview icon-color-{{selectedColor}}">
-              <view class="detail-icon-wrapper asset-icon-{{categoryId ? categoryText.toLowerCase() : 'asset-icon-other'}} {{iconAnimating ? 'icon-animating' : ''}}">
+              <view class="detail-icon-wrapper asset-icon-{{categoryId ? categoryText.toLowerCase() : 'other'}} {{iconAnimating ? 'icon-animating' : ''}}">
                 <text class="fa {{iconClass}}"></text>
               </view>
               <text class="icon-select-text">{{iconName || '点击选择图标'}}</text>
@@ -111,6 +111,69 @@
           <text class="unit-text">次</text>
         </view>
         
+        <!-- 购买渠道 -->
+        <view class="form-item">
+          <view class="item-icon">
+            <text class="fa fa-shopping-cart"></text>
+          </view>
+          <text class="form-label">购买渠道</text>
+          <input class="form-input" placeholder="输入或选择购买渠道" value="{{purchaseChannel}}" bindinput="bindKeyInput" data-field="purchaseChannel" />
+        </view>
+        
+        <!-- 快速选择购买渠道 -->
+        <view class="channel-options">
+          <view 
+            class="channel-option {{purchaseChannel === item ? 'active' : ''}}" 
+            wx:for="{{channelOptions}}" 
+            wx:key="index" 
+            bindtap="selectPurchaseChannel" 
+            data-channel="{{item}}"
+          >
+            {{item}}
+          </view>
+        </view>
+
+      </view>
+      
+      <!-- 额外费用区域 -->
+      <view class="form-section">
+        <view class="section-header">
+          <text class="section-title">额外费用</text>
+          <view class="add-btn" bindtap="showAddExtraCost">
+            <text class="fa fa-plus"></text>
+            <text>添加费用</text>
+          </view>
+        </view>
+        
+        <!-- 额外费用列表 -->
+        <view class="extra-cost-list" wx:if="{{additionalCosts.length > 0}}">
+          <view class="extra-cost-item" wx:for="{{additionalCosts}}" wx:key="id">
+            <view class="extra-cost-header">
+              <view class="extra-cost-left">
+                <text class="extra-cost-name">{{item.name || '未命名费用'}}</text>
+                <text class="extra-cost-type {{item.type === '收入' ? 'income' : 'expense'}}">{{item.type || '支出'}}</text>
+              </view>
+              <view class="extra-cost-date">{{item.date}}</view>
+            </view>
+            <view class="extra-cost-content">
+              <view class="extra-cost-amount">¥{{item.amount}}</view>
+              <view class="extra-cost-actions">
+                <view class="action-btn edit" bindtap="showEditExtraCost" data-index="{{index}}">
+                  <text class="fa fa-edit"></text>
+                </view>
+                <view class="action-btn delete" bindtap="deleteExtraCost" data-index="{{index}}">
+                  <text class="fa fa-trash"></text>
+                </view>
+              </view>
+            </view>
+            <view class="extra-cost-desc" wx:if="{{item.description}}">{{item.description}}</view>
+          </view>
+        </view>
+        
+        <!-- 无额外费用提示 -->
+        <view class="no-extra-cost" wx:else>
+          <text>无额外费用记录</text>
+        </view>
       </view>
         
       <!-- 图片上传区域 -->
@@ -174,6 +237,59 @@
         <text>{{item.name}}</text>
         <text class="fa fa-check" wx:if="{{categoryId === item.id}}"></text>
       </view>
+    </view>
+  </view>
+  
+  <!-- 额外费用编辑弹窗 -->
+  <view class="modal-mask" wx:if="{{showExtraCostModal}}" bindtap="closeExtraCostModal"></view>
+  <view class="modal-container {{showExtraCostModal ? 'show' : ''}}">
+    <view class="modal-header">
+      <text>{{currentExtraCostIndex === -1 ? '添加额外费用' : '编辑额外费用'}}</text>
+      <view class="close-btn" bindtap="closeExtraCostModal">
+        <text class="fa fa-times"></text>
+      </view>
+    </view>
+    <view class="modal-content">
+      <!-- 费用名称 -->
+      <view class="modal-form-item">
+        <text class="modal-form-label">费用名称</text>
+        <input class="modal-form-input" placeholder="请输入费用名称" value="{{currentExtraCost.name}}" bindinput="bindExtraCostInput" data-field="name" />
+      </view>
+      
+      <!-- 费用金额 -->
+      <view class="modal-form-item">
+        <text class="modal-form-label">金额 (元)</text>
+        <input class="modal-form-input" type="digit" placeholder="请输入金额" value="{{currentExtraCost.amount}}" bindinput="bindExtraCostInput" data-field="amount" />
+      </view>
+      
+      <!-- 费用日期 -->
+      <view class="modal-form-item">
+        <text class="modal-form-label">日期</text>
+        <picker mode="date" bindchange="bindExtraCostDateChange" value="{{currentExtraCost.date}}">
+          <view class="modal-form-input picker-view">
+            {{currentExtraCost.date || '选择日期'}}
+          </view>
+        </picker>
+      </view>
+      
+      <!-- 费用类型 -->
+      <view class="modal-form-item">
+        <text class="modal-form-label">费用类型</text>
+        <view class="cost-type-selector">
+          <view class="cost-type-option {{currentExtraCost.type === '支出' ? 'active' : ''}}" bindtap="selectCostType" data-type="支出">支出</view>
+          <view class="cost-type-option {{currentExtraCost.type === '收入' ? 'active' : ''}}" bindtap="selectCostType" data-type="收入">收入</view>
+        </view>
+      </view>
+      
+      <!-- 费用描述 -->
+      <view class="modal-form-item">
+        <text class="modal-form-label">备注</text>
+        <input class="modal-form-input" placeholder="请输入备注" value="{{currentExtraCost.description}}" bindinput="bindExtraCostInput" data-field="description" />
+      </view>
+    </view>
+    <view class="modal-footer">
+      <view class="btn btn-secondary" bindtap="closeExtraCostModal">取消</view>
+      <view class="btn btn-primary" bindtap="saveExtraCost">保存</view>
     </view>
   </view>
   

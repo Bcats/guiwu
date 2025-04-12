@@ -12,7 +12,14 @@
   flex: 1;
   background-color: #f7f8fa;
   padding-bottom: 60rpx;
-  overflow-y: auto; /* 允许内容滚动 */
+  overflow-y: auto; /* 确保内容可以滚动 */
+}
+
+/* 资产列表滚动区域 */
+.asset-list-scroll {
+  height: calc(100vh - 420rpx); /* 设置固定高度，减去顶部区域高度和底部tabBar高度 */
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* 状态栏 */
@@ -587,12 +594,20 @@
   top: 0;
   right: 0; /* 确保紧贴右侧 */
   height: 100%;
-  z-index: 0;
-  border-radius: 0 32rpx 32rpx 0;
+  z-index: 10; /* 提高z-index确保在顶层 */
+  border-radius: 12rpx;
   overflow: hidden;
   transition: opacity 0.3s cubic-bezier(0.25, 0.8, 0.5, 1); /* 使用与卡片相同的过渡函数 */
   will-change: opacity, transform; /* 提示浏览器这些属性会变化 */
   transform: translateZ(0); /* 启用硬件加速 */
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.15);
+}
+
+.option-buttons {
+  display: flex;
+  height: 100%;
+  background-color: white;
+  padding: 0 10rpx;
 }
 
 .option-top, .option-edit, .option-delete {
@@ -601,8 +616,11 @@
   justify-content: center;
   align-items: center;
   width: 120rpx; /* 固定宽度 */
+  height: 100%; /* 确保高度撑满 */
   color: white;
   font-size: 24rpx;
+  margin: 0 5rpx;
+  border-radius: 8rpx;
 }
 
 .option-top {
@@ -969,7 +987,6 @@
   margin-bottom: 30rpx;
   background-color: #FFFFFF;
   border-radius: 16rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.03);
 }
 
 .detail-section:last-child {
@@ -1037,13 +1054,70 @@
 
 /* 描述信息 */
 .detail-description {
-  padding: 24rpx;
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.6;
+  padding: 0 30rpx 15rpx;
   background-color: #F9F9F9;
   border-radius: 16rpx;
+}
+
+/* 额外费用样式 */
+.detail-extra-costs {
+  padding: 10rpx 30rpx;
+  background-color: #F9F9F9;
+  border-radius: 16rpx 16rpx 0 0;
+}
+
+.detail-extra-cost-item {
+  position: relative;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.detail-extra-cost-item:last-child {
+  border-bottom: none;
+}
+
+.detail-extra-cost-date {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 6rpx;
+}
+
+.detail-extra-cost-amount {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: var(--color-primary);
+  margin-bottom: 8rpx;
+}
+
+.detail-extra-cost-desc {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.detail-extra-cost-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 30rpx;
+  border-top: 1rpx solid #eee;
+  /* margin-top: 10rpx; */
+  background-color: #F9F9F9;
+  border-radius: 0 0 16rpx 16rpx;
+}
+
+.detail-extra-cost-total-label {
   font-size: 28rpx;
-  color: #666666;
-  line-height: 1.6;
-  word-break: break-word;
+  color: #333;
+  font-weight: 500;
+}
+
+.detail-extra-cost-total-value {
+  font-size: 30rpx;
+  color: var(--color-primary);
+  font-weight: 600;
 }
 
 /* 图片网格 */
@@ -1229,4 +1303,51 @@
   text-align: center;
   font-size: 24rpx;
   color: var(--color-text-light);
+}
+
+/* 操作菜单遮罩层 */
+.action-menu-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 99;
+}
+
+/* 简单操作菜单面板 */
+.simple-action-menu {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #fff;
+  width: 300rpx;
+  border-radius: 12rpx;
+  z-index: 110; /* 确保在遮罩层上方 */
+  overflow: hidden;
+}
+
+.action-menu-item {
+  padding: 24rpx 0;
+  text-align: center;
+  font-size: 34rpx;
+  color: #000;
+  position: relative;
+}
+
+.action-menu-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1rpx;
+  background-color: #f0f0f0;
+}
+
+/* 点击效果 */
+.action-menu-item:active {
+  background-color: #f0f0f0;
 }
