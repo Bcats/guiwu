@@ -76,9 +76,22 @@ const statisticsUtil = {
       const usageDays = dateUtil.daysBetween(asset.purchaseDate);
       // 确保使用天数至少为1天，避免除以0的错误
       const effectiveUsageDays = Math.max(1, usageDays);
-      console.log(effectiveUsageDays);
+      
+      // 获取基础价格
+      let totalCost = Number(asset.price) || 0;
+      
+      // 添加额外费用
+      if (asset.additionalCosts && Array.isArray(asset.additionalCosts)) {
+        asset.additionalCosts.forEach(cost => {
+          totalCost += Number(cost.amount) || 0;
+        });
+      } else if (asset.additionalCost) {
+        // 兼容旧版额外费用字段
+        totalCost += Number(asset.additionalCost) || 0;
+      }
+      
       // 计算每个资产的日均成本
-      const assetDailyCost = (Number(asset.price) || 0) / effectiveUsageDays;
+      const assetDailyCost = totalCost / effectiveUsageDays;
       // 累加所有资产的日均成本
       dailyAverage += assetDailyCost;
       
@@ -87,7 +100,7 @@ const statisticsUtil = {
       // 确保使用次数至少为1次，避免除以0的错误
       const effectiveUsageCount = Math.max(1, usageCount);
       // 计算每个资产的次均成本
-      const assetUsageCost = (Number(asset.price) || 0) / effectiveUsageCount;
+      const assetUsageCost = totalCost / effectiveUsageCount;
       // 累加所有资产的次均成本
       usageAverage += assetUsageCost;
     });
